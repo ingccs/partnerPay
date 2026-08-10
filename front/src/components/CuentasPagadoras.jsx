@@ -9,6 +9,9 @@ export default function CuentasPagadoras() {
   const [cargando, setCargando] = useState(false);
   const [notificacion, setNotificacion] = useState({ show: false, mensaje: '', tipo: 'success' });
 
+  // Control para expandir o contraer el formulario (inicia contraído)
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+
   // Estado de edición (null = Modo Creación, ID = Modo Edición)
   const [idEditando, setIdEditando] = useState(null);
 
@@ -83,6 +86,7 @@ export default function CuentasPagadoras() {
     setMobile(cuenta.mobile || '');
     setBalance(cuenta.balance || '');
 
+    setMostrarFormulario(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -122,6 +126,7 @@ export default function CuentasPagadoras() {
       })
       .then(() => {
         limpiarFormulario();
+        setMostrarFormulario(false);
         cargarCuentas();
         mostrarNotificacion(esEdicion ? '¡Cuenta modificada con éxito!' : '¡Cuenta registrada con éxito!');
       })
@@ -137,7 +142,10 @@ export default function CuentasPagadoras() {
     fetch(`${API_URL}/cuentas-pagadoras/${id}`, { method: 'DELETE' })
       .then(res => {
         if (!res.ok) throw new Error("Error al eliminar");
-        if (idEditando === id) limpiarFormulario();
+        if (idEditando === id) {
+          limpiarFormulario();
+          setMostrarFormulario(false);
+        }
         cargarCuentas();
         mostrarNotificacion('Cuenta pagadora eliminada correctamente.');
       })
@@ -159,7 +167,7 @@ export default function CuentasPagadoras() {
   });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Notificación Flotante de Alto Impacto (Toast) */}
       {notificacion.show && (
         <div className="fixed top-6 right-6 z-50 animate-bounce duration-300">
@@ -191,161 +199,194 @@ export default function CuentasPagadoras() {
         </div>
       )}
 
-      {/* Formulario de Registro / Edición */}
-      <div className="bg-white p-6 sm:p-8 rounded-2xl border border-zinc-200 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-zinc-900 flex items-center gap-2">
-            <span>{idEditando ? '✏️' : '🏦'}</span> 
-            {idEditando ? `Modificar Cuenta Pagadora #${idEditando}` : 'Registrar Cuenta Pagadora'}
+      {/* Barra de Acciones y Toggle del Formulario */}
+      <div className="flex items-center justify-between bg-white p-5 rounded-3xl border border-zinc-200 shadow-sm">
+        <div>
+          <h2 className="text-base font-bold text-zinc-900 flex items-center gap-2">
+            <span>🏦</span> Gestión de Cuentas Pagadoras
           </h2>
-          {idEditando && (
-            <span className="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg">
-              Modo Edición Activo
-            </span>
-          )}
+          <p className="text-xs text-zinc-500 mt-0.5">
+            Configuración y administración de las cuentas bancarias destino para dispersión de pagos
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {/* Tipo y RIF/Cédula */}
-            <div>
-              <label className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wider">
-                Documento (Tipo / RIF o CI) *
-              </label>
-              <div className="flex gap-2">
-                <select
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
-                  className="bg-zinc-50 border border-zinc-300 text-zinc-900 text-sm rounded-xl focus:ring-zinc-500 focus:border-zinc-500 p-2.5 font-medium"
-                >
-                  <option value="J">J</option>
-                  <option value="V">V</option>
-                  <option value="E">E</option>
-                  <option value="G">G</option>
-                  <option value="P">P</option>
-                </select>
+        <button
+          type="button"
+          onClick={() => {
+            if (mostrarFormulario && idEditando) {
+              limpiarFormulario();
+            }
+            setMostrarFormulario(!mostrarFormulario);
+          }}
+          className={`px-5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 cursor-pointer shadow-sm ${
+            mostrarFormulario
+              ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-800'
+              : 'bg-zinc-900 hover:bg-zinc-800 text-white'
+          }`}
+        >
+          <span>{mostrarFormulario ? '✕ Ocultar Formulario' : '➕ Nueva Cuenta Pagadora'}</span>
+        </button>
+      </div>
+
+      {/* Formulario Desplegable */}
+      {mostrarFormulario && (
+        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-zinc-200 shadow-sm animate-fade-in">
+          <div className="flex items-center justify-between mb-6 pb-3 border-b border-zinc-100">
+            <h3 className="text-base font-bold text-zinc-900 flex items-center gap-2">
+              <span>{idEditando ? '✏️' : '🏦'}</span> 
+              {idEditando ? `Modificar Cuenta Pagadora #${idEditando}` : 'Registrar Cuenta Pagadora'}
+            </h3>
+            {idEditando && (
+              <span className="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg">
+                Modo Edición Activo
+              </span>
+            )}
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {/* Tipo y RIF/Cédula */}
+              <div>
+                <label className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wider">
+                  Documento (Tipo / RIF o CI) *
+                </label>
+                <div className="flex gap-2">
+                  <select
+                    value={type}
+                    onChange={(e) => setType(e.target.value)}
+                    className="bg-zinc-50 border border-zinc-300 text-zinc-900 text-sm rounded-xl focus:ring-zinc-500 focus:border-zinc-500 p-2.5 font-medium"
+                  >
+                    <option value="J">J</option>
+                    <option value="V">V</option>
+                    <option value="E">E</option>
+                    <option value="G">G</option>
+                    <option value="P">P</option>
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="Ej: 123456789"
+                    value={rif}
+                    onChange={(e) => setRif(e.target.value)}
+                    required
+                    className="flex-1 bg-zinc-50 border border-zinc-300 text-zinc-900 text-sm rounded-xl focus:ring-zinc-500 focus:border-zinc-500 p-2.5"
+                  />
+                </div>
+              </div>
+
+              {/* Titular */}
+              <div>
+                <label className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wider">
+                  Titular de la Cuenta *
+                </label>
                 <input
                   type="text"
-                  placeholder="Ej: 123456789"
-                  value={rif}
-                  onChange={(e) => setRif(e.target.value)}
+                  placeholder="NOMBRE O RAZÓN SOCIAL"
+                  value={titular}
+                  onChange={(e) => setTitular(e.target.value.toUpperCase())}
                   required
-                  className="flex-1 bg-zinc-50 border border-zinc-300 text-zinc-900 text-sm rounded-xl focus:ring-zinc-500 focus:border-zinc-500 p-2.5"
+                  className="w-full bg-zinc-50 border border-zinc-300 text-zinc-900 text-sm rounded-xl focus:ring-zinc-500 focus:border-zinc-500 p-2.5 uppercase font-medium"
+                />
+              </div>
+
+              {/* Banco */}
+              <div>
+                <label className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wider">
+                  Banco *
+                </label>
+                <select
+                  value={banco}
+                  onChange={(e) => setBanco(e.target.value)}
+                  required
+                  className="w-full bg-zinc-50 border border-zinc-300 text-zinc-900 text-sm rounded-xl focus:ring-zinc-500 focus:border-zinc-500 p-2.5"
+                >
+                  <option value="">
+                    {bancosList.length === 0 ? '-- Cargando bancos... --' : '-- Seleccione un banco --'}
+                  </option>
+                  {bancosList.map((item, index) => {
+                    const id = item.idbco || item.idbank || item.id || index;
+                    const codigo = item.cbanco || item.code || '';
+                    const nombre = item.xbanco || item.xBanco || item.name || item.nombre || 'Sin nombre';
+
+                    return (
+                      <option key={id} value={nombre}>
+                        {codigo ? `${codigo} - ` : ''}{nombre}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              {/* Teléfono Asociado */}
+              <div>
+                <label className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wider">
+                  Teléfono Asociado (Pago Móvil) *
+                </label>
+                <input
+                  type="text"
+                  placeholder="04141234567"
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value)}
+                  required
+                  className="w-full bg-zinc-50 border border-zinc-300 text-zinc-900 text-sm rounded-xl focus:ring-zinc-500 focus:border-zinc-500 p-2.5 font-mono"
+                />
+              </div>
+
+              {/* Número de Cuenta */}
+              <div>
+                <label className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wider">
+                  Número de Cuenta (20 dígitos) *
+                </label>
+                <input
+                  type="text"
+                  maxLength={20}
+                  placeholder="01340000000000000000"
+                  value={nrocta}
+                  onChange={(e) => setNrocta(e.target.value)}
+                  required
+                  className="w-full bg-zinc-50 border border-zinc-300 text-zinc-900 text-sm rounded-xl focus:ring-zinc-500 focus:border-zinc-500 p-2.5 font-mono"
+                />
+              </div>
+
+              {/* Balance Inicial */}
+              <div>
+                <label className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wider">
+                  Balance Inicial
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={balance}
+                  onChange={(e) => setBalance(e.target.value)}
+                  className="w-full bg-zinc-50 border border-zinc-300 text-zinc-900 text-sm rounded-xl focus:ring-zinc-500 focus:border-zinc-500 p-2.5"
                 />
               </div>
             </div>
 
-            {/* Titular */}
-            <div>
-              <label className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wider">
-                Titular de la Cuenta *
-              </label>
-              <input
-                type="text"
-                placeholder="NOMBRE O RAZÓN SOCIAL"
-                value={titular}
-                onChange={(e) => setTitular(e.target.value.toUpperCase())}
-                required
-                className="w-full bg-zinc-50 border border-zinc-300 text-zinc-900 text-sm rounded-xl focus:ring-zinc-500 focus:border-zinc-500 p-2.5 uppercase font-medium"
-              />
-            </div>
-
-            {/* Banco */}
-            <div>
-              <label className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wider">
-                Banco *
-              </label>
-              <select
-                value={banco}
-                onChange={(e) => setBanco(e.target.value)}
-                required
-                className="w-full bg-zinc-50 border border-zinc-300 text-zinc-900 text-sm rounded-xl focus:ring-zinc-500 focus:border-zinc-500 p-2.5"
-              >
-                <option value="">
-                  {bancosList.length === 0 ? '-- Cargando bancos... --' : '-- Seleccione un banco --'}
-                </option>
-                {bancosList.map((item, index) => {
-                  const id = item.idbco || item.idbank || item.id || index;
-                  const codigo = item.cbanco || item.code || '';
-                  const nombre = item.xbanco || item.xBanco || item.name || item.nombre || 'Sin nombre';
-
-                  return (
-                    <option key={id} value={nombre}>
-                      {codigo ? `${codigo} - ` : ''}{nombre}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-
-            {/* Teléfono Asociado */}
-            <div>
-              <label className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wider">
-                Teléfono Asociado (Pago Móvil) *
-              </label>
-              <input
-                type="text"
-                placeholder="04141234567"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-                required
-                className="w-full bg-zinc-50 border border-zinc-300 text-zinc-900 text-sm rounded-xl focus:ring-zinc-500 focus:border-zinc-500 p-2.5 font-mono"
-              />
-            </div>
-
-            {/* Número de Cuenta */}
-            <div>
-              <label className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wider">
-                Número de Cuenta (20 dígitos) *
-              </label>
-              <input
-                type="text"
-                maxLength={20}
-                placeholder="01340000000000000000"
-                value={nrocta}
-                onChange={(e) => setNrocta(e.target.value)}
-                required
-                className="w-full bg-zinc-50 border border-zinc-300 text-zinc-900 text-sm rounded-xl focus:ring-zinc-500 focus:border-zinc-500 p-2.5 font-mono"
-              />
-            </div>
-
-            {/* Balance Inicial */}
-            <div>
-              <label className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wider">
-                Balance Inicial
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                placeholder="0.00"
-                value={balance}
-                onChange={(e) => setBalance(e.target.value)}
-                className="w-full bg-zinc-50 border border-zinc-300 text-zinc-900 text-sm rounded-xl focus:ring-zinc-500 focus:border-zinc-500 p-2.5"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-2">
-            {idEditando && (
+            <div className="flex justify-end gap-3 pt-2">
               <button
                 type="button"
-                onClick={limpiarFormulario}
+                onClick={() => {
+                  limpiarFormulario();
+                  setMostrarFormulario(false);
+                }}
                 className="bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold text-sm px-5 py-2.5 rounded-xl transition-all cursor-pointer"
               >
-                Cancelar Edición
+                Cancelar
               </button>
-            )}
-            <button
-              type="submit"
-              className="bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
-            >
-              {idEditando ? 'Guardar Cambios' : 'Guardar Cuenta Pagadora'}
-            </button>
-          </div>
-        </form>
-      </div>
 
-      {/* Tabla de Registros */}
+              <button
+                type="submit"
+                className="bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
+              >
+                {idEditando ? 'Guardar Cambios' : 'Guardar Cuenta Pagadora'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Tabla de Registros Visible por Defecto */}
       <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
         <div className="p-6 border-b border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>

@@ -8,6 +8,9 @@ export default function FrecuenciasPago() {
   const [cargando, setCargando] = useState(false);
   const [notificacion, setNotificacion] = useState({ show: false, mensaje: '', tipo: 'success' });
 
+  // Control para expandir o contraer el formulario (inicia contraído)
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+
   // Estado Edición
   const [idEditando, setIdEditando] = useState(null);
 
@@ -60,6 +63,7 @@ export default function FrecuenciasPago() {
     setIdEditando(id);
     setFreq(nombreFreq);
     setNumDias(dias);
+    setMostrarFormulario(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -94,6 +98,7 @@ export default function FrecuenciasPago() {
       })
       .then(() => {
         limpiarFormulario();
+        setMostrarFormulario(false);
         cargarFrecuencias();
         mostrarNotificacion(esEdicion ? '¡Frecuencia modificada con éxito!' : '¡Frecuencia de pago creada con éxito!');
       })
@@ -109,7 +114,10 @@ export default function FrecuenciasPago() {
     fetch(`${API_URL}/frecuencias-pago/${id}`, { method: 'DELETE' })
       .then(res => {
         if (!res.ok) throw new Error("Error al eliminar");
-        if (idEditando === id) limpiarFormulario();
+        if (idEditando === id) {
+          limpiarFormulario();
+          setMostrarFormulario(false);
+        }
         cargarFrecuencias();
         mostrarNotificacion('Frecuencia eliminada correctamente.');
       })
@@ -126,7 +134,7 @@ export default function FrecuenciasPago() {
   });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Notificación Flotante de Alto Impacto (Toast) */}
       {notificacion.show && (
         <div className="fixed top-6 right-6 z-50 animate-bounce duration-300">
@@ -158,72 +166,104 @@ export default function FrecuenciasPago() {
         </div>
       )}
 
-      {/* Formulario de Registro / Edición */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm">
-        <div className="flex items-center justify-between mb-6 pb-3 border-b border-zinc-100">
+      {/* Barra de Acciones y Toggle del Formulario */}
+      <div className="flex items-center justify-between bg-white p-5 rounded-3xl border border-zinc-200 shadow-sm">
+        <div>
           <h2 className="text-base font-bold text-zinc-900 flex items-center gap-2">
-            <span>📅</span> {idEditando ? `Modificar Frecuencia #${idEditando}` : 'Frecuencia de Liquidación de Pago'}
+            <span>📅</span> Gestión de Frecuencias de Pago
           </h2>
-          {idEditando && (
-            <span className="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg">
-              Modo Edición Activo
-            </span>
-          )}
+          <p className="text-xs text-zinc-500 mt-0.5">
+            Configuración de los lapsos y días de liquidación para dispersión de pagos
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                Frecuencia de Pago (Freq) *
-              </label>
-              <input
-                type="text"
-                placeholder="EJ: Inmediato, Semanal, Quincenal..."
-                value={freq}
-                onChange={(e) => setFreq(e.target.value)}
-                required
-                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                Cantidad de Días *
-              </label>
-              <input
-                type="number"
-                min="0"
-                placeholder="Ej: 1, 7, 15, 30"
-                value={numDias}
-                onChange={(e) => setNumDias(e.target.value)}
-                required
-                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-mono font-bold focus:outline-none focus:border-zinc-900"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-2">
-            {idEditando && (
-              <button
-                type="button"
-                onClick={limpiarFormulario}
-                className="bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-bold text-sm px-5 py-3 rounded-xl transition-all cursor-pointer"
-              >
-                Cancelar Edición
-              </button>
-            )}
-            <button
-              type="submit"
-              className="bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-sm px-6 py-3 rounded-xl transition-all shadow-sm cursor-pointer"
-            >
-              {idEditando ? 'Guardar Cambios' : 'Crear Frecuencia de Pago'}
-            </button>
-          </div>
-        </form>
+        <button
+          type="button"
+          onClick={() => {
+            if (mostrarFormulario && idEditando) {
+              limpiarFormulario();
+            }
+            setMostrarFormulario(!mostrarFormulario);
+          }}
+          className={`px-5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 cursor-pointer shadow-sm ${
+            mostrarFormulario
+              ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-800'
+              : 'bg-zinc-900 hover:bg-zinc-800 text-white'
+          }`}
+        >
+          <span>{mostrarFormulario ? '✕ Ocultar Formulario' : '➕ Nueva Frecuencia de Pago'}</span>
+        </button>
       </div>
 
-      {/* Tabla de Registros */}
+      {/* Formulario Desplegable */}
+      {mostrarFormulario && (
+        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm animate-fade-in">
+          <div className="flex items-center justify-between mb-6 pb-3 border-b border-zinc-100">
+            <h3 className="text-base font-bold text-zinc-900 flex items-center gap-2">
+              <span>📅</span> {idEditando ? `Modificar Frecuencia #${idEditando}` : 'Frecuencia de Liquidación de Pago'}
+            </h3>
+            {idEditando && (
+              <span className="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg">
+                Modo Edición Activo
+              </span>
+            )}
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                  Frecuencia de Pago (Freq) *
+                </label>
+                <input
+                  type="text"
+                  placeholder="EJ: Inmediato, Semanal, Quincenal..."
+                  value={freq}
+                  onChange={(e) => setFreq(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                  Cantidad de Días *
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="Ej: 1, 7, 15, 30"
+                  value={numDias}
+                  onChange={(e) => setNumDias(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-mono font-bold focus:outline-none focus:border-zinc-900"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  limpiarFormulario();
+                  setMostrarFormulario(false);
+                }}
+                className="bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-bold text-sm px-5 py-3 rounded-xl transition-all cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-sm px-6 py-3 rounded-xl transition-all shadow-sm cursor-pointer"
+              >
+                {idEditando ? 'Guardar Cambios' : 'Crear Frecuencia de Pago'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Tabla de Registros Visible por Defecto */}
       <div className="bg-white rounded-3xl border border-zinc-200 shadow-sm overflow-hidden">
         <div className="p-6 border-b border-zinc-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -288,7 +328,7 @@ export default function FrecuenciasPago() {
                             className="p-2 text-zinc-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all cursor-pointer"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
                           </button>
                           <button

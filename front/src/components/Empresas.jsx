@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 export default function Empresas({
   notificacion,
   setNotificacion,
@@ -30,8 +32,25 @@ export default function Empresas({
   idEditandoCompany,
   limpiarFormularioCompany
 }) {
+  // Estado para controlar la visibilidad del formulario (contraído por defecto)
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+
+  // Wrapper para abrir el formulario automáticamente al hacer clic en Editar
+  const handleEditar = (comp) => {
+    if (seleccionarParaEditarCompany) {
+      seleccionarParaEditarCompany(comp);
+      setMostrarFormulario(true);
+    }
+  };
+
+  // Wrapper para manejar el envío y contraer el formulario al guardar exitosamente
+  const handleFormSubmit = (e) => {
+    handleSubmitCompany(e);
+    setMostrarFormulario(false);
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Notificación Flotante de Alto Impacto (Toast) */}
       {notificacion.show && (
         <div className="fixed top-6 right-6 z-50 animate-bounce duration-300">
@@ -63,188 +82,221 @@ export default function Empresas({
         </div>
       )}
 
-      {/* Formulario de Registro / Edición de Empresas */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm">
-        <div className="flex items-center justify-between mb-6 pb-3 border-b border-zinc-100">
-          <h3 className="text-base font-bold text-zinc-900 flex items-center gap-2">
-            <span>{idEditandoCompany ? '✏️' : '🏢'}</span> 
-            {idEditandoCompany ? `Modificar Empresa #${idEditandoCompany}` : 'Nuevo Proveedor de Servicio'}
-          </h3>
-          {idEditandoCompany && (
-            <span className="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg">
-              Modo Edición Activo
-            </span>
-          )}
+      {/* Barra de Acciones y Toggle del Formulario */}
+      <div className="flex items-center justify-between bg-white p-5 rounded-3xl border border-zinc-200 shadow-sm">
+        <div>
+          <h2 className="text-base font-bold text-zinc-900 flex items-center gap-2">
+            <span>🏢</span> Proveedores de Servicio
+          </h2>
+          <p className="text-xs text-zinc-500 mt-0.5">
+            Registro y administración de empresas aseguradoras y prestadores de servicio
+          </p>
         </div>
 
-        <form onSubmit={handleSubmitCompany} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {/* Código Proveedor (Opcional) */}
-          <div>
-            <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-              Código Proveedor (Si existe) <span className="text-zinc-400 font-normal">(Opcional)</span>
-            </label>
-            <input 
-              type="text" 
-              value={compCodexPr} 
-              onChange={(e) => setCompCodexPr(e.target.value)} 
-              placeholder="Auto (ID) si se deja vacío" 
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">Tipo (Typ)</label>
-            <select 
-              value={compTyp} 
-              onChange={(e) => setCompTyp(e.target.value)}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-            >
-              <option value="J">J - Jurídico</option>
-              <option value="G">G - Gubernamental</option>
-              <option value="V">V - Personal</option>
-              <option value="E">E - Extranjero</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">R.I.F. / C.I. (Ci)</label>
-            <input 
-              type="text" 
-              value={compCi} 
-              onChange={(e) => setCompCi(e.target.value.replace(/\D/g, ''))} 
-              placeholder="Ej. 123456789" 
-              maxLength={9}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">Nombre de Empresa</label>
-            <input 
-              type="text" 
-              value={compName} 
-              onChange={(e) => setCompName(e.target.value)} 
-              placeholder="Development Soft, C.A." 
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">Correo Electrónico</label>
-            <input 
-              type="email" 
-              value={compEmail} 
-              onChange={(e) => setCompEmail(e.target.value)} 
-              placeholder="contacto@empresa.com" 
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">Teléfono Móvil</label>
-            <input 
-              type="text" 
-              value={compMobile} 
-              onChange={(e) => setCompMobile(e.target.value.replace(/\D/g, ''))} 
-              placeholder="04141234567" 
-              maxLength={11}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">Estado del País</label>
-            <select 
-              value={compCEstado} 
-              onChange={(e) => {
-                setCompCEstado(e.target.value);
-                setCompXCity('');
-              }} 
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-              required
-            >
-              <option value="">Seleccione un estado...</option>
-              {statesList.map((state) => {
-                const valEstado = String(state.cestado ?? state.cEstado ?? state.idEstado ?? '');
-                return (
-                  <option key={state.idEstado || valEstado} value={valEstado}>
-                    {state.xDescripcionL ? state.xDescripcionL.trim() : state.xdescripcionL}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">Ciudad (XCity)</label>
-            <select 
-              value={compXCity} 
-              onChange={(e) => setCompXCity(e.target.value)} 
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-              required
-              disabled={!compCEstado}
-            >
-              <option value="">{compCEstado ? "Seleccione una ciudad..." : "Primero seleccione un estado..."}</option>
-              {ciudadesFiltradas.map((city) => {
-                const nombreCiudad = String(city.ciuDescripcionL || city.xdescripcionL || "").trim();
-                return (
-                  <option key={city.idCiudad || nombreCiudad} value={nombreCiudad}>
-                    {nombreCiudad}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">Estatus (IdEstatus)</label>
-            <select 
-              value={compIdEstatus} 
-              onChange={(e) => setCompIdEstatus(e.target.value)}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-            >
-              <option value={1}>Activo</option>
-              <option value={0}>Inactivo</option>
-            </select>
-          </div>
-
-          <div className="sm:col-span-2 lg:col-span-3">
-            <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">Dirección Fiscal (XDir)</label>
-            <input 
-              type="text" 
-              value={compXDir} 
-              onChange={(e) => setCompXDir(e.target.value)} 
-              placeholder="Av. Principal, Edificio..." 
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-              required
-            />
-          </div>
-
-          <div className="sm:col-span-2 lg:col-span-3 pt-2 flex justify-end gap-3">
-            {idEditandoCompany && limpiarFormularioCompany && (
-              <button
-                type="button"
-                onClick={limpiarFormularioCompany}
-                className="bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-bold text-sm px-5 py-3.5 rounded-xl transition-all cursor-pointer"
-              >
-                Cancelar Edición
-              </button>
-            )}
-            <button 
-              type="submit" 
-              className="w-full sm:w-auto py-3.5 px-8 bg-zinc-900 hover:bg-zinc-800 text-white font-bold rounded-xl transition-all text-sm cursor-pointer shadow-sm"
-            >
-              {idEditandoCompany ? 'Guardar Cambios en Empresa' : 'Crear Proveedor de Servicio'}
-            </button>
-          </div>
-        </form>
+        <button
+          type="button"
+          onClick={() => {
+            if (mostrarFormulario && idEditandoCompany && limpiarFormularioCompany) {
+              limpiarFormularioCompany();
+            }
+            setMostrarFormulario(!mostrarFormulario);
+          }}
+          className={`px-5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 cursor-pointer shadow-sm ${
+            mostrarFormulario
+              ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-800'
+              : 'bg-zinc-900 hover:bg-zinc-800 text-white'
+          }`}
+        >
+          <span>{mostrarFormulario ? '✕ Ocultar Formulario' : '➕ Nuevo Proveedor de Servicio'}</span>
+        </button>
       </div>
 
-      {/* Listado de Empresas Registradas */}
+      {/* Formulario de Registro / Edición de Empresas (Desplegable) */}
+      {mostrarFormulario && (
+        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm animate-fade-in">
+          <div className="flex items-center justify-between mb-6 pb-3 border-b border-zinc-100">
+            <h3 className="text-base font-bold text-zinc-900 flex items-center gap-2">
+              <span>{idEditandoCompany ? '✏️' : '🏢'}</span> 
+              {idEditandoCompany ? `Modificar Empresa #${idEditandoCompany}` : 'Nuevo Proveedor de Servicio'}
+            </h3>
+            {idEditandoCompany && (
+              <span className="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg">
+                Modo Edición Activo
+              </span>
+            )}
+          </div>
+
+          <form onSubmit={handleFormSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {/* Código Proveedor (Opcional) */}
+            <div>
+              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                Código Proveedor (Si existe) <span className="text-zinc-400 font-normal">(Opcional)</span>
+              </label>
+              <input 
+                type="text" 
+                value={compCodexPr} 
+                onChange={(e) => setCompCodexPr(e.target.value)} 
+                placeholder="Auto (ID) si se deja vacío" 
+                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">Tipo (Typ)</label>
+              <select 
+                value={compTyp} 
+                onChange={(e) => setCompTyp(e.target.value)}
+                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+              >
+                <option value="J">J - Jurídico</option>
+                <option value="G">G - Gubernamental</option>
+                <option value="V">V - Personal</option>
+                <option value="E">E - Extranjero</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">R.I.F. / C.I. (Ci)</label>
+              <input 
+                type="text" 
+                value={compCi} 
+                onChange={(e) => setCompCi(e.target.value.replace(/\D/g, ''))} 
+                placeholder="Ej. 123456789" 
+                maxLength={9}
+                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">Nombre de Empresa</label>
+              <input 
+                type="text" 
+                value={compName} 
+                onChange={(e) => setCompName(e.target.value)} 
+                placeholder="Development Soft, C.A." 
+                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">Correo Electrónico</label>
+              <input 
+                type="email" 
+                value={compEmail} 
+                onChange={(e) => setCompEmail(e.target.value)} 
+                placeholder="contacto@empresa.com" 
+                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">Teléfono Móvil</label>
+              <input 
+                type="text" 
+                value={compMobile} 
+                onChange={(e) => setCompMobile(e.target.value.replace(/\D/g, ''))} 
+                placeholder="04141234567" 
+                maxLength={11}
+                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">Estado del País</label>
+              <select 
+                value={compCEstado} 
+                onChange={(e) => {
+                  setCompCEstado(e.target.value);
+                  setCompXCity('');
+                }} 
+                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+                required
+              >
+                <option value="">Seleccione un estado...</option>
+                {statesList.map((state) => {
+                  const valEstado = String(state.cestado ?? state.cEstado ?? state.idEstado ?? '');
+                  return (
+                    <option key={state.idEstado || valEstado} value={valEstado}>
+                      {state.xDescripcionL ? state.xDescripcionL.trim() : state.xdescripcionL}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">Ciudad (XCity)</label>
+              <select 
+                value={compXCity} 
+                onChange={(e) => setCompXCity(e.target.value)} 
+                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+                required
+                disabled={!compCEstado}
+              >
+                <option value="">{compCEstado ? "Seleccione una ciudad..." : "Primero seleccione un estado..."}</option>
+                {ciudadesFiltradas.map((city) => {
+                  const nombreCiudad = String(city.ciuDescripcionL || city.xdescripcionL || "").trim();
+                  return (
+                    <option key={city.idCiudad || nombreCiudad} value={nombreCiudad}>
+                      {nombreCiudad}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">Estatus (IdEstatus)</label>
+              <select 
+                value={compIdEstatus} 
+                onChange={(e) => setCompIdEstatus(e.target.value)}
+                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+              >
+                <option value={1}>Activo</option>
+                <option value={0}>Inactivo</option>
+              </select>
+            </div>
+
+            <div className="sm:col-span-2 lg:col-span-3">
+              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">Dirección Fiscal (XDir)</label>
+              <input 
+                type="text" 
+                value={compXDir} 
+                onChange={(e) => setCompXDir(e.target.value)} 
+                placeholder="Av. Principal, Edificio..." 
+                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+                required
+              />
+            </div>
+
+            <div className="sm:col-span-2 lg:col-span-3 pt-2 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  if (limpiarFormularioCompany) limpiarFormularioCompany();
+                  setMostrarFormulario(false);
+                }}
+                className="bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-bold text-sm px-5 py-3.5 rounded-xl transition-all cursor-pointer"
+              >
+                Cancelar
+              </button>
+
+              <button 
+                type="submit" 
+                className="w-full sm:w-auto py-3.5 px-8 bg-zinc-900 hover:bg-zinc-800 text-white font-bold rounded-xl transition-all text-sm cursor-pointer shadow-sm"
+              >
+                {idEditandoCompany ? 'Guardar Cambios en Empresa' : 'Crear Proveedor de Servicio'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Listado de Empresas Registradas (Visible por defecto) */}
       <div className="bg-white rounded-3xl border border-zinc-200 shadow-sm overflow-hidden">
         <div className="p-6 border-b border-zinc-100">
           <h3 className="text-sm font-bold text-zinc-900">Proveedores de Servicios Registrados</h3>
@@ -301,7 +353,7 @@ export default function Empresas({
                         <div className="flex items-center justify-center gap-1.5">
                           {seleccionarParaEditarCompany && (
                             <button
-                              onClick={() => seleccionarParaEditarCompany(comp)}
+                              onClick={() => handleEditar(comp)}
                               title="Editar empresa"
                               className="p-2 text-zinc-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all cursor-pointer"
                             >

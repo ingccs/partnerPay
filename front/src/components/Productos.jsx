@@ -8,6 +8,9 @@ export default function Productos({ companiesList = [], ramosList = [] }) {
   const [busqueda, setBusqueda] = useState('');
   const [notificacion, setNotificacion] = useState({ show: false, mensaje: '', tipo: 'success' });
 
+  // Control para expandir o contraer el formulario (inicia contraído)
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+
   const [idEditando, setIdEditando] = useState(null);
 
   const [idcmpy, setIdcmpy] = useState('');
@@ -102,6 +105,7 @@ export default function Productos({ companiesList = [], ramosList = [] }) {
       setCoverages([{ name: '', percent: '' }]);
     }
 
+    setMostrarFormulario(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -152,6 +156,7 @@ export default function Productos({ companiesList = [], ramosList = [] }) {
       })
       .then(() => {
         limpiarFormulario();
+        setMostrarFormulario(false);
         cargarProductos();
         mostrarNotificacion(esEdicion ? '¡Producto actualizado con éxito!' : '¡Producto y Coberturas registrados con éxito!');
       })
@@ -167,7 +172,10 @@ export default function Productos({ companiesList = [], ramosList = [] }) {
     fetch(`${API_URL}/products/${id}`, { method: 'DELETE' })
       .then(res => {
         if (!res.ok) throw new Error("Error al eliminar");
-        if (idEditando === id) limpiarFormulario();
+        if (idEditando === id) {
+          limpiarFormulario();
+          setMostrarFormulario(false);
+        }
         cargarProductos();
         mostrarNotificacion('Producto eliminado correctamente.');
       })
@@ -184,7 +192,7 @@ export default function Productos({ companiesList = [], ramosList = [] }) {
   });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Notificación Flotante (Toast) */}
       {notificacion.show && (
         <div className="fixed top-6 right-6 z-50 animate-bounce duration-300">
@@ -216,197 +224,229 @@ export default function Productos({ companiesList = [], ramosList = [] }) {
         </div>
       )}
 
-      {/* Formulario de Producto y Coberturas */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm">
-        <div className="flex items-center justify-between mb-6 pb-3 border-b border-zinc-100">
+      {/* Barra de Acciones y Toggle del Formulario */}
+      <div className="flex items-center justify-between bg-white p-5 rounded-3xl border border-zinc-200 shadow-sm">
+        <div>
           <h2 className="text-base font-bold text-zinc-900 flex items-center gap-2">
-            <span>📦</span> {idEditando ? `Modificar Plan/Producto #${idEditando}` : 'Registrar Nuevo Plan / Producto'}
+            <span>📦</span> Planes y Coberturas
           </h2>
-          {idEditando && (
-            <span className="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg">
-              Modo Edición Activo
-            </span>
-          )}
+          <p className="text-xs text-zinc-500 mt-0.5">
+            Administración de productos, planes ofertados y sus coberturas asociadas
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            <div>
-              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                Proveedor de Servicio (Empresa) *
-              </label>
-              <select
-                value={idcmpy}
-                onChange={(e) => setIdcmpy(e.target.value)}
-                required
-                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-              >
-                <option value="">-- Seleccione Proveedor --</option>
-                {empresasSeguras.map((c, idx) => {
-                  const companyId = c.idCmpy ?? c.idcmpy ?? c.id_cmpy ?? c.id ?? `comp-${idx}`;
-                  return (
-                    <option key={`company-${companyId}-${idx}`} value={c.idCmpy ?? c.idcmpy ?? c.id_cmpy ?? c.id}>
-                      {c.name || c.xname || `Empresa #${companyId}`} ({c.typ || 'J'}-{c.ci || ''})
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                Ramo *
-              </label>
-              <select
-                value={idramo}
-                onChange={(e) => setIdramo(e.target.value)}
-                required
-                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-              >
-                <option value="">-- Seleccione Ramo --</option>
-                {ramosSeguros.map((r, idx) => {
-                  const ramoId = r.idRamo ?? r.idramo ?? r.id_ramo ?? r.id;
-                  const nombreRamo = r.xRamoSisip || r.xramoSisip || r.xramo || r.nombre || `Ramo #${ramoId}`;
-
-                  return (
-                    <option key={`ramo-opt-${ramoId ?? idx}`} value={ramoId}>
-                      {nombreRamo}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                Nombre del Plan (CPlan SISIP) *
-              </label>
-              <input
-                type="text"
-                placeholder="EJ: PLAN SALUD GOLD 2026"
-                value={cplanSisip}
-                onChange={(e) => setCplanSisip(e.target.value.toUpperCase())}
-                required
-                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900 uppercase"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                Código Ramo SISIP
-              </label>
-              <input
-                type="number"
-                placeholder="Ej. 101"
-                value={cramoSisip}
-                onChange={(e) => setCramoSisip(e.target.value)}
-                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                ID Producto SISIP
-              </label>
-              <input
-                type="number"
-                placeholder="Ej. 505"
-                value={idProductoSisip}
-                onChange={(e) => setIdProductoSisip(e.target.value)}
-                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                Estatus
-              </label>
-              <select
-                value={idestatus}
-                onChange={(e) => setIdestatus(e.target.value)}
-                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-              >
-                <option value={1}>Activo</option>
-                <option value={0}>Inactivo</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Sub-formulario de Coberturas */}
-          <div className="pt-4 border-t border-zinc-100">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-2">
-                <span>🛡️</span> Coberturas Asociadas y Porcentajes de Comisión
-              </h3>
-              <button
-                type="button"
-                onClick={handleAddCoverage}
-                className="text-xs font-bold text-zinc-900 bg-zinc-100 hover:bg-zinc-200 px-3 py-1.5 rounded-lg transition-all cursor-pointer"
-              >
-                + Agregar Cobertura
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              {coverages.map((cov, idx) => (
-                <div key={idx} className="flex items-center gap-3 bg-zinc-50 p-3 rounded-2xl border border-zinc-200">
-                  <div className="flex-1">
-                    <input
-                      type="text"
-                      placeholder="Nombre de Cobertura (Ej: Hospitalización y Cirugía)"
-                      value={cov.name}
-                      onChange={(e) => handleCoverageChange(idx, 'name', e.target.value.toUpperCase())}
-                      className="w-full px-3.5 py-2 bg-white border border-zinc-300 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900 uppercase"
-                    />
-                  </div>
-                  <div className="w-40">
-                    <div className="relative">
-                      <input
-                        type="number"
-                        step="0.01"
-                        placeholder="Comisión %"
-                        value={cov.percent}
-                        onChange={(e) => handleCoverageChange(idx, 'percent', e.target.value)}
-                        className="w-full px-3.5 py-2 bg-white border border-zinc-300 rounded-xl text-zinc-900 text-sm font-mono font-bold focus:outline-none focus:border-zinc-900 pr-8"
-                      />
-                      <span className="absolute right-3 top-2.5 text-xs text-zinc-400 font-bold">%</span>
-                    </div>
-                  </div>
-                  {coverages.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveCoverage(idx)}
-                      className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-2">
-            {idEditando && (
-              <button
-                type="button"
-                onClick={limpiarFormulario}
-                className="bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-bold text-sm px-5 py-3 rounded-xl transition-all cursor-pointer"
-              >
-                Cancelar Edición
-              </button>
-            )}
-            <button
-              type="submit"
-              className="bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-sm px-6 py-3 rounded-xl transition-all shadow-sm cursor-pointer"
-            >
-              {idEditando ? 'Guardar Cambios en Producto' : 'Guardar Producto y Coberturas'}
-            </button>
-          </div>
-        </form>
+        <button
+          type="button"
+          onClick={() => {
+            if (mostrarFormulario && idEditando) {
+              limpiarFormulario();
+            }
+            setMostrarFormulario(!mostrarFormulario);
+          }}
+          className={`px-5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 cursor-pointer shadow-sm ${
+            mostrarFormulario
+              ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-800'
+              : 'bg-zinc-900 hover:bg-zinc-800 text-white'
+          }`}
+        >
+          <span>{mostrarFormulario ? '✕ Ocultar Formulario' : '➕ Nuevo Plan / Producto'}</span>
+        </button>
       </div>
 
-      {/* Tabla de Registros */}
+      {/* Formulario Desplegable */}
+      {mostrarFormulario && (
+        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm animate-fade-in">
+          <div className="flex items-center justify-between mb-6 pb-3 border-b border-zinc-100">
+            <h3 className="text-sm font-bold text-zinc-900 flex items-center gap-2">
+              <span>✏️</span> {idEditando ? `Modificar Plan/Producto #${idEditando}` : 'Registrar Nuevo Plan / Producto'}
+            </h3>
+            {idEditando && (
+              <span className="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg">
+                Modo Edición Activo
+              </span>
+            )}
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                  Proveedor de Servicio (Empresa) *
+                </label>
+                <select
+                  value={idcmpy}
+                  onChange={(e) => setIdcmpy(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+                >
+                  <option value="">-- Seleccione Proveedor --</option>
+                  {empresasSeguras.map((c, idx) => {
+                    const companyId = c.idCmpy ?? c.idcmpy ?? c.id_cmpy ?? c.id ?? `comp-${idx}`;
+                    return (
+                      <option key={`company-${companyId}-${idx}`} value={c.idCmpy ?? c.idcmpy ?? c.id_cmpy ?? c.id}>
+                        {c.name || c.xname || `Empresa #${companyId}`} ({c.typ || 'J'}-{c.ci || ''})
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                  Ramo *
+                </label>
+                <select
+                  value={idramo}
+                  onChange={(e) => setIdramo(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+                >
+                  <option value="">-- Seleccione Ramo --</option>
+                  {ramosSeguros.map((r, idx) => {
+                    const ramoId = r.idRamo ?? r.idramo ?? r.id_ramo ?? r.id;
+                    const nombreRamo = r.xRamoSisip || r.xramoSisip || r.xramo || r.nombre || `Ramo #${ramoId}`;
+
+                    return (
+                      <option key={`ramo-opt-${ramoId ?? idx}`} value={ramoId}>
+                        {nombreRamo}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                  Nombre del Plan (CPlan SISIP) *
+                </label>
+                <input
+                  type="text"
+                  placeholder="EJ: PLAN SALUD GOLD 2026"
+                  value={cplanSisip}
+                  onChange={(e) => setCplanSisip(e.target.value.toUpperCase())}
+                  required
+                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900 uppercase"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                  Código Ramo SISIP
+                </label>
+                <input
+                  type="number"
+                  placeholder="Ej. 101"
+                  value={cramoSisip}
+                  onChange={(e) => setCramoSisip(e.target.value)}
+                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                  ID Producto SISIP
+                </label>
+                <input
+                  type="number"
+                  placeholder="Ej. 505"
+                  value={idProductoSisip}
+                  onChange={(e) => setIdProductoSisip(e.target.value)}
+                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                  Estatus
+                </label>
+                <select
+                  value={idestatus}
+                  onChange={(e) => setIdestatus(e.target.value)}
+                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+                >
+                  <option value={1}>Activo</option>
+                  <option value={0}>Inactivo</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Sub-formulario de Coberturas */}
+            <div className="pt-4 border-t border-zinc-100">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-2">
+                  <span>🛡️</span> Coberturas Asociadas y Porcentajes de Comisión
+                </h3>
+                <button
+                  type="button"
+                  onClick={handleAddCoverage}
+                  className="text-xs font-bold text-zinc-900 bg-zinc-100 hover:bg-zinc-200 px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+                >
+                  + Agregar Cobertura
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {coverages.map((cov, idx) => (
+                  <div key={idx} className="flex items-center gap-3 bg-zinc-50 p-3 rounded-2xl border border-zinc-200">
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        placeholder="Nombre de Cobertura (Ej: Hospitalización y Cirugía)"
+                        value={cov.name}
+                        onChange={(e) => handleCoverageChange(idx, 'name', e.target.value.toUpperCase())}
+                        className="w-full px-3.5 py-2 bg-white border border-zinc-300 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900 uppercase"
+                      />
+                    </div>
+                    <div className="w-40">
+                      <div className="relative">
+                        <input
+                          type="number"
+                          step="0.01"
+                          placeholder="Comisión %"
+                          value={cov.percent}
+                          onChange={(e) => handleCoverageChange(idx, 'percent', e.target.value)}
+                          className="w-full px-3.5 py-2 bg-white border border-zinc-300 rounded-xl text-zinc-900 text-sm font-mono font-bold focus:outline-none focus:border-zinc-900 pr-8"
+                        />
+                        <span className="absolute right-3 top-2.5 text-xs text-zinc-400 font-bold">%</span>
+                      </div>
+                    </div>
+                    {coverages.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveCoverage(idx)}
+                        className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  limpiarFormulario();
+                  setMostrarFormulario(false);
+                }}
+                className="bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-bold text-sm px-5 py-3 rounded-xl transition-all cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-sm px-6 py-3 rounded-xl transition-all shadow-sm cursor-pointer"
+              >
+                {idEditando ? 'Guardar Cambios en Producto' : 'Guardar Producto y Coberturas'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Tabla de Registros Visible por Defecto */}
       <div className="bg-white rounded-3xl border border-zinc-200 shadow-sm overflow-hidden">
         <div className="p-6 border-b border-zinc-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>

@@ -10,6 +10,9 @@ export default function Afiliados({ statesList = [], ciudadesFiltradas = [], set
   const [busqueda, setBusqueda] = useState('');
   const [notificacion, setNotificacion] = useState({ show: false, mensaje: '', tipo: 'success' });
 
+  // Control para expandir o contraer el formulario (inicia contraído)
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+
   // Estado Edición
   const [idEditando, setIdEditando] = useState(null);
 
@@ -136,6 +139,7 @@ export default function Afiliados({ statesList = [], ciudadesFiltradas = [], set
     setFpay(item.fpay ? String(item.fpay) : '');
 
     setTimeout(() => setXcity(item.xcity || ''), 50);
+    setMostrarFormulario(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -146,7 +150,6 @@ export default function Afiliados({ statesList = [], ciudadesFiltradas = [], set
       return;
     }
 
-    // Regla de negocio: Si se llenan los datos bancarios idestatus = 1, si faltan idestatus = 2
     const tieneDatosBancarios = banco.trim() !== '' && nrocta.trim() !== '';
     const estatusCalculado = tieneDatosBancarios ? 1 : 2;
 
@@ -192,6 +195,7 @@ export default function Afiliados({ statesList = [], ciudadesFiltradas = [], set
       })
       .then(() => {
         limpiarFormulario();
+        setMostrarFormulario(false);
         cargarSellers();
         mostrarNotificacion(esEdicion ? '¡Afiliado modificado con éxito!' : '¡Afiliado registrado con éxito!');
       })
@@ -207,7 +211,10 @@ export default function Afiliados({ statesList = [], ciudadesFiltradas = [], set
     fetch(`${API_URL}/sellers/${id}`, { method: 'DELETE' })
       .then(res => {
         if (!res.ok) throw new Error("Error al eliminar");
-        if (idEditando === id) limpiarFormulario();
+        if (idEditando === id) {
+          limpiarFormulario();
+          setMostrarFormulario(false);
+        }
         cargarSellers();
         mostrarNotificacion('Afiliado eliminado correctamente.');
       })
@@ -226,8 +233,8 @@ export default function Afiliados({ statesList = [], ciudadesFiltradas = [], set
   });
 
   return (
-    <div className="space-y-8">
-      {/* Notificación Flotante de Alto Impacto (Toast) */}
+    <div className="space-y-6">
+      {/* Notificación Flotante */}
       {notificacion.show && (
         <div className="fixed top-6 right-6 z-50 animate-bounce duration-300">
           <div
@@ -258,354 +265,372 @@ export default function Afiliados({ statesList = [], ciudadesFiltradas = [], set
         </div>
       )}
 
-      {/* Formulario de Registro / Edición de Afiliados */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm">
-        <div className="flex items-center justify-between mb-6 pb-3 border-b border-zinc-100">
+      {/* Barra de Acciones y Toggle del Formulario */}
+      <div className="flex items-center justify-between bg-white p-5 rounded-3xl border border-zinc-200 shadow-sm">
+        <div>
           <h2 className="text-base font-bold text-zinc-900 flex items-center gap-2">
-            <span>👥</span> {idEditando ? `Modificar Afiliado #${idEditando}` : 'Nuevo Afiliado / Vendedor'}
+            <span>👥</span> Gestión de Afiliados y Vendedores
           </h2>
-          {idEditando && (
-            <span className="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg">
-              Modo Edición Activo
-            </span>
-          )}
+          <p className="text-xs text-zinc-500 mt-0.5">
+            Consulta y registro de la nómina de afiliados de la plataforma
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-5">
-            {/* Línea 1: Documento, Nombres, Apellidos, Fecha Nacimiento */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {/* Documento y Cédula */}
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                  Documento (Tipo / C.I. o RIF) *
-                </label>
-                <div className="flex gap-2">
-                  <select
-                    value={typ}
-                    onChange={(e) => setTyp(e.target.value)}
-                    className="bg-zinc-50 border border-zinc-200 text-zinc-900 text-sm rounded-xl p-3 font-medium focus:outline-none focus:border-zinc-900"
-                  >
-                    <option value="V">V</option>
-                    <option value="E">E</option>
-                    <option value="J">J</option>
-                    <option value="G">G</option>
-                  </select>
+        <button
+          type="button"
+          onClick={() => {
+            if (mostrarFormulario && idEditando) {
+              limpiarFormulario();
+            }
+            setMostrarFormulario(!mostrarFormulario);
+          }}
+          className={`px-5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 cursor-pointer shadow-sm ${
+            mostrarFormulario
+              ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-800'
+              : 'bg-zinc-900 hover:bg-zinc-800 text-white'
+          }`}
+        >
+          <span>{mostrarFormulario ? '✕ Ocultar Formulario' : '➕ Nuevo Afiliado / Vendedor'}</span>
+        </button>
+      </div>
+
+      {/* Formulario Desplegable */}
+      {mostrarFormulario && (
+        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm animate-fade-in">
+          <div className="flex items-center justify-between mb-6 pb-3 border-b border-zinc-100">
+            <h3 className="text-sm font-bold text-zinc-900 flex items-center gap-2">
+              <span>✏️</span> {idEditando ? `Modificar Afiliado #${idEditando}` : 'Ingresar Datos del Nuevo Afiliado'}
+            </h3>
+            {idEditando && (
+              <span className="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg">
+                Modo Edición Activo
+              </span>
+            )}
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-5">
+              {/* Línea 1: Documento, Nombres, Apellidos, Fecha Nacimiento */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                    Documento (Tipo / C.I. o RIF) *
+                  </label>
+                  <div className="flex gap-2">
+                    <select
+                      value={typ}
+                      onChange={(e) => setTyp(e.target.value)}
+                      className="bg-zinc-50 border border-zinc-200 text-zinc-900 text-sm rounded-xl p-3 font-medium focus:outline-none focus:border-zinc-900"
+                    >
+                      <option value="V">V</option>
+                      <option value="E">E</option>
+                      <option value="J">J</option>
+                      <option value="G">G</option>
+                    </select>
+                    <input
+                      type="text"
+                      placeholder="Ej: 12345678"
+                      value={ci}
+                      onChange={(e) => setCi(e.target.value.replace(/\D/g, ''))}
+                      maxLength={9}
+                      required
+                      className="flex-1 bg-zinc-50 border border-zinc-200 text-zinc-900 text-sm rounded-xl p-3 focus:outline-none focus:border-zinc-900 font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                    Nombres *
+                  </label>
                   <input
                     type="text"
-                    placeholder="Ej: 12345678"
-                    value={ci}
-                    onChange={(e) => setCi(e.target.value.replace(/\D/g, ''))}
-                    maxLength={9}
+                    placeholder="Nombres del afiliado"
+                    value={name}
+                    onChange={(e) => setName(e.target.value.toUpperCase())}
                     required
-                    className="flex-1 bg-zinc-50 border border-zinc-200 text-zinc-900 text-sm rounded-xl p-3 focus:outline-none focus:border-zinc-900 font-mono"
+                    className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900 uppercase"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                    Apellidos *
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Apellidos del afiliado"
+                    value={lastname}
+                    onChange={(e) => setLastname(e.target.value.toUpperCase())}
+                    required
+                    className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900 uppercase"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                    Fecha de Nacimiento *
+                  </label>
+                  <input
+                    type="date"
+                    value={fechaNac}
+                    onChange={(e) => setFechaNac(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
                   />
                 </div>
               </div>
 
-              {/* Nombres */}
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                  Nombres *
-                </label>
-                <input
-                  type="text"
-                  placeholder="Nombres del afiliado"
-                  value={name}
-                  onChange={(e) => setName(e.target.value.toUpperCase())}
-                  required
-                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900 uppercase"
-                />
+              {/* Línea 2: Código, Nivel, Correo, Teléfono */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                    Código Afiliado (Codigo Externo)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej. AFL-001"
+                    value={code}
+                    maxLength={9}
+                    onChange={(e) => setCode(e.target.value.toUpperCase())}
+                    className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900 uppercase"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                    Nivel de Afiliado *
+                  </label>
+                  <select
+                    value={nivel}
+                    onChange={(e) => setNivel(parseInt(e.target.value))}
+                    className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-mono font-bold focus:outline-none focus:border-zinc-900"
+                  >
+                    <option value={1}>Nivel 1</option>
+                    <option value={2}>Nivel 2</option>
+                    <option value={3}>Nivel 3</option>
+                    <option value={4}>Nivel 4</option>
+                    <option value={5}>Nivel 5</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                    Correo Electrónico *
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="correo@ejemplo.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                    Teléfono Móvil *
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="04141234567"
+                    value={mobile}
+                    maxLength={11}
+                    onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
+                    required
+                    className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-mono font-bold focus:outline-none focus:border-zinc-900"
+                  />
+                </div>
               </div>
 
-              {/* Apellidos */}
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                  Apellidos *
-                </label>
-                <input
-                  type="text"
-                  placeholder="Apellidos del afiliado"
-                  value={lastname}
-                  onChange={(e) => setLastname(e.target.value.toUpperCase())}
-                  required
-                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900 uppercase"
-                />
-              </div>
+              {/* Línea 3: Estado Civil, Género, Estado, Ciudad */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                    Estado Civil *
+                  </label>
+                  <select
+                    value={ecivil}
+                    onChange={(e) => setEcivil(e.target.value)}
+                    className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+                  >
+                    <option value="S">Soltero(a)</option>
+                    <option value="C">Casado(a)</option>
+                    <option value="D">Divorciado(a)</option>
+                    <option value="V">Viudo(a)</option>
+                    <option value="C">Concubinato</option>
+                  </select>
+                </div>
 
-              {/* Fecha de Nacimiento */}
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                  Fecha de Nacimiento *
-                </label>
-                <input
-                  type="date"
-                  value={fechaNac}
-                  onChange={(e) => setFechaNac(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-                />
-              </div>
-            </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                    Género *
+                  </label>
+                  <select
+                    value={sexx}
+                    onChange={(e) => setSexx(e.target.value)}
+                    className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+                  >
+                    <option value="M">Masculino</option>
+                    <option value="F">Femenino</option>
+                  </select>
+                </div>
 
-            {/* Línea 2: Código, Nivel, Correo, Teléfono */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {/* Código Afiliado */}
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                  Código Afiliado (Codigo Externo)
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ej. AFL-001"
-                  value={code}
-                  maxLength={9}
-                  onChange={(e) => setCode(e.target.value.toUpperCase())}
-                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900 uppercase"
-                />
-              </div>
-
-              {/* Nivel de Afiliado */}
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                  Nivel de Afiliado *
-                </label>
-                <select
-                  value={nivel}
-                  onChange={(e) => setNivel(parseInt(e.target.value))}
-                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-mono font-bold focus:outline-none focus:border-zinc-900"
-                >
-                  <option value={1}>Nivel 1</option>
-                  <option value={2}>Nivel 2</option>
-                  <option value={3}>Nivel 3</option>
-                  <option value={4}>Nivel 4</option>
-                  <option value={5}>Nivel 5</option>
-                </select>
-              </div>
-
-              {/* Correo Electrónico */}
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                  Correo Electrónico *
-                </label>
-                <input
-                  type="email"
-                  placeholder="correo@ejemplo.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-                />
-              </div>
-
-              {/* Teléfono Móvil */}
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                  Teléfono Móvil *
-                </label>
-                <input
-                  type="text"
-                  placeholder="04141234567"
-                  value={mobile}
-                  maxLength={11}
-                  onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
-                  required
-                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-mono font-bold focus:outline-none focus:border-zinc-900"
-                />
-              </div>
-            </div>
-
-            {/* Línea 3: Estado Civil, Género, Estado, Ciudad */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {/* Estado Civil */}
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                  Estado Civil *
-                </label>
-                <select
-                  value={ecivil}
-                  onChange={(e) => setEcivil(e.target.value)}
-                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-                >
-                  <option value="S">Soltero(a)</option>
-                  <option value="C">Casado(a)</option>
-                  <option value="D">Divorciado(a)</option>
-                  <option value="V">Viudo(a)</option>
-                  <option value="C">Concubinato</option>
-                </select>
-              </div>
-
-              {/* Género (Sexx) */}
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                  Género *
-                </label>
-                <select
-                  value={sexx}
-                  onChange={(e) => setSexx(e.target.value)}
-                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-                >
-                  <option value="M">Masculino</option>
-                  <option value="F">Femenino</option>
-                </select>
-              </div>
-
-              {/* Estado del País */}
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                  Estado *
-                </label>
-                <select
-                  value={cestado}
-                  onChange={(e) => {
-                    setCestado(e.target.value);
-                    setXcity('');
-                  }}
-                  required
-                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-                >
-                  <option value="">Seleccione Estado...</option>
-                  {statesList.map((st) => {
-                    const valEstado = String(st.cestado ?? st.cEstado ?? st.idEstado ?? '');
-                    return (
-                      <option key={st.idEstado || valEstado} value={valEstado}>
-                        {st.xDescripcionL ? st.xDescripcionL.trim() : st.xdescripcionL}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-
-              {/* Ciudad */}
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                  Ciudad (Xcity) *
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ej. CARACAS, GUARENAS"
-                  value={xcity}
-                  onChange={(e) => setXcity(e.target.value.toUpperCase())}
-                  required
-                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900 uppercase"
-                />
-              </div>
-            </div>
-
-            {/* Línea 4: Dirección Fiscal */}
-            <div>
-              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                Dirección Fiscal (Xdir) *
-              </label>
-              <input
-                type="text"
-                placeholder="Av. Principal, Edificio, Casa..."
-                value={xdir}
-                onChange={(e) => setXdir(e.target.value.toUpperCase())}
-                required
-                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900 uppercase"
-              />
-            </div>
-          </div>
-
-          {/* Recuadro Diferenciado para Datos Financieros y Pago */}
-          <div className="p-5 sm:p-6 bg-zinc-50/80 rounded-2xl border border-zinc-200/90 shadow-inner space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-zinc-200/60">
-              <span className="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-2">
-                <span>💳</span> Información Bancaria y Forma de Pago
-              </span>
-              <span className="text-[10px] font-extrabold px-2.5 py-0.5 bg-zinc-200 text-zinc-700 rounded-full uppercase tracking-wider">
-                Datos Opcionales
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {/* Banco */}
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                  Banco
-                </label>
-                <select
-                  value={banco}
-                  onChange={(e) => setBanco(e.target.value)}
-                  className="w-full px-4 py-3 bg-white border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-                >
-                  <option value="">-- Seleccione Banco --</option>
-                  {bancosList.map((item, index) => {
-                    const nombre = item.xbanco || item.xBanco || item.name || item.nombre || 'Sin nombre';
-                    return (
-                      <option key={index} value={nombre}>
-                        {nombre}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-
-              {/* Número de Cuenta */}
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                  Número de Cuenta (20 dígitos)
-                </label>
-                <input
-                  type="text"
-                  maxLength={20}
-                  placeholder="01340000000000000000"
-                  value={nrocta}
-                  onChange={(e) => setNrocta(e.target.value.replace(/\D/g, ''))}
-                  className="w-full px-4 py-3 bg-white border border-zinc-200 rounded-xl text-zinc-900 text-sm font-mono focus:outline-none focus:border-zinc-900"
-                />
-              </div>
-
-              {/* Forma de Pago */}
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
-                  Forma de Pago (Fpay) *
-                </label>
-                <select
-                  value={fpay}
-                  onChange={(e) => setFpay(e.target.value)}
-                  className="w-full px-4 py-3 bg-white border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
-                >
-                  {frecuenciasPagoList.length === 0 ? (
-                    <option value="">Cargando formas de pago...</option>
-                  ) : (
-                    frecuenciasPagoList.map((item, index) => {
-                      const idFreq = item.idfqcypay ?? item.idFqcypay ?? item.id ?? index;
-                      const nombreFreq = item.freq ?? item.Freq ?? item.fpay ?? 'Sin Nombre';
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                    Estado *
+                  </label>
+                  <select
+                    value={cestado}
+                    onChange={(e) => {
+                      setCestado(e.target.value);
+                      setXcity('');
+                    }}
+                    required
+                    className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+                  >
+                    <option value="">Seleccione Estado...</option>
+                    {statesList.map((st) => {
+                      const valEstado = String(st.cestado ?? st.cEstado ?? st.idEstado ?? '');
                       return (
-                        <option key={idFreq} value={idFreq}>
-                          {nombreFreq}
+                        <option key={st.idEstado || valEstado} value={valEstado}>
+                          {st.xDescripcionL ? st.xDescripcionL.trim() : st.xdescripcionL}
                         </option>
                       );
-                    })
-                  )}
-                </select>
+                    })}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                    Ciudad (Xcity) *
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej. CARACAS, GUARENAS"
+                    value={xcity}
+                    onChange={(e) => setXcity(e.target.value.toUpperCase())}
+                    required
+                    className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900 uppercase"
+                  />
+                </div>
+              </div>
+
+              {/* Línea 4: Dirección Fiscal */}
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                  Dirección Fiscal (Xdir) *
+                </label>
+                <input
+                  type="text"
+                  placeholder="Av. Principal, Edificio, Casa..."
+                  value={xdir}
+                  onChange={(e) => setXdir(e.target.value.toUpperCase())}
+                  required
+                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900 uppercase"
+                />
               </div>
             </div>
-          </div>
 
-          <div className="flex justify-end gap-3 pt-2">
-            {idEditando && (
+            {/* Recuadro Diferenciado para Datos Financieros y Pago */}
+            <div className="p-5 sm:p-6 bg-zinc-50/80 rounded-2xl border border-zinc-200/90 shadow-inner space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-zinc-200/60">
+                <span className="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-2">
+                  <span>💳</span> Información Bancaria y Forma de Pago
+                </span>
+                <span className="text-[10px] font-extrabold px-2.5 py-0.5 bg-zinc-200 text-zinc-700 rounded-full uppercase tracking-wider">
+                  Datos Opcionales
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                    Banco
+                  </label>
+                  <select
+                    value={banco}
+                    onChange={(e) => setBanco(e.target.value)}
+                    className="w-full px-4 py-3 bg-white border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+                  >
+                    <option value="">-- Seleccione Banco --</option>
+                    {bancosList.map((item, index) => {
+                      const nombre = item.xbanco || item.xBanco || item.name || item.nombre || 'Sin nombre';
+                      return (
+                        <option key={index} value={nombre}>
+                          {nombre}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                    Número de Cuenta (20 dígitos)
+                  </label>
+                  <input
+                    type="text"
+                    maxLength={20}
+                    placeholder="01340000000000000000"
+                    value={nrocta}
+                    onChange={(e) => setNrocta(e.target.value.replace(/\D/g, ''))}
+                    className="w-full px-4 py-3 bg-white border border-zinc-200 rounded-xl text-zinc-900 text-sm font-mono focus:outline-none focus:border-zinc-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-2">
+                    Forma de Pago (Fpay) *
+                  </label>
+                  <select
+                    value={fpay}
+                    onChange={(e) => setFpay(e.target.value)}
+                    className="w-full px-4 py-3 bg-white border border-zinc-200 rounded-xl text-zinc-900 text-sm font-medium focus:outline-none focus:border-zinc-900"
+                  >
+                    {frecuenciasPagoList.length === 0 ? (
+                      <option value="">Cargando formas de pago...</option>
+                    ) : (
+                      frecuenciasPagoList.map((item, index) => {
+                        const idFreq = item.idfqcypay ?? item.idFqcypay ?? item.id ?? index;
+                        const nombreFreq = item.freq ?? item.Freq ?? item.fpay ?? 'Sin Nombre';
+                        return (
+                          <option key={idFreq} value={idFreq}>
+                            {nombreFreq}
+                          </option>
+                        );
+                      })
+                    )}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
               <button
                 type="button"
-                onClick={limpiarFormulario}
+                onClick={() => {
+                  limpiarFormulario();
+                  setMostrarFormulario(false);
+                }}
                 className="bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-bold text-sm px-5 py-3 rounded-xl transition-all cursor-pointer"
               >
-                Cancelar Edición
+                Cancelar
               </button>
-            )}
-            <button
-              type="submit"
-              className="bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-sm px-6 py-3 rounded-xl transition-all shadow-sm cursor-pointer"
-            >
-              {idEditando ? 'Guardar Cambios en Afiliado' : 'Registrar Afiliado'}
-            </button>
-          </div>
-        </form>
-      </div>
 
-      {/* Tabla de Registros */}
+              <button
+                type="submit"
+                className="bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-sm px-6 py-3 rounded-xl transition-all shadow-sm cursor-pointer"
+              >
+                {idEditando ? 'Guardar Cambios en Afiliado' : 'Registrar Afiliado'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Tabla de Registros Visible por Defecto */}
       <div className="bg-white rounded-3xl border border-zinc-200 shadow-sm overflow-hidden">
         <div className="p-6 border-b border-zinc-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -633,7 +658,7 @@ export default function Afiliados({ statesList = [], ciudadesFiltradas = [], set
                 <th className="py-4 px-6">Nombre Completo</th>
                 <th className="py-4 px-6">Contacto</th>
                 <th className="py-4 px-6 text-center">Nivel</th>
-                <th className="py-4 px-6 text-center">Pago</th>
+                <th className="py-4 px-6 text-center">Estatus</th>
                 <th className="py-4 px-6 text-center">Acciones</th>
               </tr>
             </thead>

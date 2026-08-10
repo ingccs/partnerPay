@@ -1,93 +1,220 @@
-export default function Sidebar({ seccionActiva, setSeccionActiva, menuConfigAbierto, setMenuConfigAbierto, handleLogout }) {
+import { useState } from 'react';
+
+export default function Sidebar({ seccionActiva, setSeccionActiva }) {
+  // Estado para controlar qué secciones están desplegadas (inician todas cerradas/false)
+  const [seccionesAbiertas, setSeccionesAbiertas] = useState({
+    configuracion: false,
+    comercial: false,
+    sistema: false
+  });
+
+  const toggleSeccion = (clave) => {
+    setSeccionesAbiertas(prev => ({
+      ...prev,
+      [clave]: !prev[clave]
+    }));
+  };
+
+  const handleSeleccionarOpcion = (itemKey) => {
+    setSeccionActiva(itemKey);
+  };
+
   return (
-    <aside className="w-72 bg-zinc-950 border-r border-zinc-800 text-zinc-100 flex flex-col hidden md:flex shadow-2xl">
-      <div className="p-6 border-b border-zinc-800 flex items-center gap-3.5">
-        <div className="w-10 h-10 rounded-xl bg-zinc-850 border border-zinc-700 text-white font-extrabold flex items-center justify-center text-sm">
-          DS
+    <aside className="w-72 bg-zinc-950 border-r border-zinc-800 text-zinc-100 flex flex-col hidden md:flex shadow-2xl sticky top-0 h-screen shrink-0 overflow-y-auto">
+      {/* Brand Header */}
+      <div className="p-6 border-b border-zinc-800/80 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-zinc-100 to-zinc-400 text-zinc-950 font-black text-lg flex items-center justify-center shadow-lg">
+          PP
         </div>
         <div>
-          <h3 className="text-xs font-bold text-white tracking-wide">PartnerPay</h3>
-          <span className="text-[10px] text-zinc-400 font-semibold uppercase tracking-widest">Enterprise Suite</span>
+          <h1 className="font-extrabold text-sm tracking-tight text-white">PartnerPay</h1>
+          <span className="text-[10px] text-zinc-500 font-semibold uppercase tracking-widest block">Panel de Control</span>
         </div>
       </div>
 
-      <nav className="p-4 space-y-1.5 flex-1 overflow-y-auto">
-        <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-3 mb-2">Principal</div>
+      {/* Menú de Navegación Nivel Categorías */}
+      <nav className="p-4 space-y-3 flex-1">
         
-        <button 
-          onClick={() => setSeccionActiva('analytics')}
-          className={`w-full text-left px-3.5 py-3 rounded-xl font-medium text-sm transition-all flex items-center gap-3 cursor-pointer ${seccionActiva === 'analytics' ? 'bg-zinc-800 text-white font-semibold' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}
+        {/* Dashboard Principal Directo */}
+        <button
+          onClick={() => handleSeleccionarOpcion('analytics')}
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+            seccionActiva === 'analytics'
+              ? 'bg-zinc-800 text-white border border-zinc-700 shadow-sm'
+              : 'text-zinc-400 hover:text-white hover:bg-zinc-900/80'
+          }`}
         >
-          <span>📊</span> Métricas del Sistema
+          <span className="text-base">📊</span>
+          <span>Métricas Principales</span>
         </button>
 
-        <div className="pt-4 pb-2">
-          <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-3 mb-2">Gestión Operativa</div>
-          
-          <button 
-            onClick={() => setSeccionActiva('afiliados')}
-            className={`w-full text-left px-3.5 py-3 rounded-xl font-medium text-sm transition-all flex items-center gap-3 cursor-pointer ${seccionActiva === 'afiliados' ? 'bg-zinc-800 text-white font-semibold' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}
+        {/* Grupo 1: Configuración Operativa */}
+        <div className="border border-zinc-800/60 rounded-2xl overflow-hidden bg-zinc-900/20">
+          <button
+            onClick={() => toggleSeccion('configuracion')}
+            className="w-full flex items-center justify-between p-3.5 text-xs font-bold text-zinc-300 hover:text-white transition-colors cursor-pointer"
           >
-            <span>👥</span> Afiliados
+            <div className="flex items-center gap-2.5">
+              <span className="text-sm">⚙️</span>
+              <span>Configuración Operativa</span>
+            </div>
+            <span className="text-[10px] text-zinc-500 transition-transform duration-200">
+              {seccionesAbiertas.configuracion ? '▲' : '▼'}
+            </span>
           </button>
 
-          <button 
-            onClick={() => setSeccionActiva('reportes')}
-            className={`w-full text-left px-3.5 py-3 rounded-xl font-medium text-sm transition-all flex items-center gap-3 cursor-pointer ${seccionActiva === 'reportes' ? 'bg-zinc-800 text-white font-semibold' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}
-          >
-            <span>📈</span> Reportes
-          </button>
+          {seccionesAbiertas.configuracion && (
+            <div className="p-2 space-y-1 bg-zinc-950/60 border-t border-zinc-800/50">
+              <button
+                onClick={() => handleSeleccionarOpcion('empresas')}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  seccionActiva === 'empresas'
+                    ? 'bg-zinc-800 text-white font-bold'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
+                }`}
+              >
+                <span>🏢</span>
+                <span>Empresas Proveedoras</span>
+              </button>
 
-          <button 
-            onClick={() => setSeccionActiva('soporte')}
-            className={`w-full text-left px-3.5 py-3 rounded-xl font-medium text-sm transition-all flex items-center gap-3 cursor-pointer ${seccionActiva === 'soporte' ? 'bg-zinc-800 text-white font-semibold' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}
-          >
-            <span>🎧</span> Soporte
-          </button>
+              <button
+                onClick={() => handleSeleccionarOpcion('ramos')}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  seccionActiva === 'ramos'
+                    ? 'bg-zinc-800 text-white font-bold'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
+                }`}
+              >
+                <span>🏷️</span>
+                <span>Ramos de Seguro</span>
+              </button>
+
+              <button
+                onClick={() => handleSeleccionarOpcion('productos')}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  seccionActiva === 'productos'
+                    ? 'bg-zinc-800 text-white font-bold'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
+                }`}
+              >
+                <span>📦</span>
+                <span>Planes y Coberturas</span>
+              </button>
+            </div>
+          )}
         </div>
 
-        <div className="pt-2 pb-2">
-          <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-3 mb-2">Administración</div>
-          
-          <div className="bg-zinc-900/60 rounded-2xl p-1.5 border border-zinc-800/80">
-            <button 
-              onClick={() => setMenuConfigAbierto(!menuConfigAbierto)}
-              className="w-full text-left px-3 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-between text-zinc-300 hover:text-white cursor-pointer"
-            >
-              <span className="flex items-center gap-3"><span>⚙️</span> Configurar</span>
-              <span className={`text-[10px] text-zinc-400 transition-transform duration-200 ${menuConfigAbierto ? 'rotate-90 text-white' : ''}`}>▶</span>
-            </button>
+        {/* Grupo 2: Gestión Comercial y Finanzas */}
+        <div className="border border-zinc-800/60 rounded-2xl overflow-hidden bg-zinc-900/20">
+          <button
+            onClick={() => toggleSeccion('comercial')}
+            className="w-full flex items-center justify-between p-3.5 text-xs font-bold text-zinc-300 hover:text-white transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="text-sm">💼</span>
+              <span>Comercial y Pago</span>
+            </div>
+            <span className="text-[10px] text-zinc-500 transition-transform duration-200">
+              {seccionesAbiertas.comercial ? '▲' : '▼'}
+            </span>
+          </button>
 
-            {menuConfigAbierto && (
-              <div className="pl-3 mt-1 space-y-1 border-l border-zinc-800 ml-4 py-1">
-                <button onClick={() => setSeccionActiva('empresas')} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-all ${seccionActiva === 'empresas' ? 'bg-zinc-800 text-white font-bold' : 'text-zinc-400 hover:text-zinc-200'}`}>
-                  Proveedores de Servicio
-                </button>
-                <button onClick={() => setSeccionActiva('ramos')} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-all ${seccionActiva === 'ramos' ? 'bg-zinc-800 text-white font-bold' : 'text-zinc-400 hover:text-zinc-200'}`}>
-                  Ramos
-                </button>
-                <button onClick={() => setSeccionActiva('productos')} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-all ${seccionActiva === 'productos' ? 'bg-zinc-800 text-white font-bold' : 'text-zinc-400 hover:text-zinc-200'}`}>
-                  Planes/Coberturas
-                </button>
-                <button onClick={() => setSeccionActiva('cuentas_pagadoras')} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-all ${seccionActiva === 'cuentas_pagadoras' ? 'bg-zinc-800 text-white font-bold' : 'text-zinc-400 hover:text-zinc-200'}`}>
-                  Cuentas Pagadoras
-                </button>
-                <button onClick={() => setSeccionActiva('frecuencias_pago')} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-all ${seccionActiva === 'frecuencias_pago' ? 'bg-zinc-800 text-white font-bold' : 'text-zinc-400 hover:text-zinc-200'}`}>
-                  Frecuencias de Pago
-                </button>
-              </div>
-            )}
-          </div>
+          {seccionesAbiertas.comercial && (
+            <div className="p-2 space-y-1 bg-zinc-950/60 border-t border-zinc-800/50">
+              <button
+                onClick={() => handleSeleccionarOpcion('afiliados')}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  seccionActiva === 'afiliados'
+                    ? 'bg-zinc-800 text-white font-bold'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
+                }`}
+              >
+                <span>👥</span>
+                <span>Afiliados / Vendedores</span>
+              </button>
+
+              <button
+                onClick={() => handleSeleccionarOpcion('cuentas_pagadoras')}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  seccionActiva === 'cuentas_pagadoras'
+                    ? 'bg-zinc-800 text-white font-bold'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
+                }`}
+              >
+                <span>🏦</span>
+                <span>Cuentas Pagadoras</span>
+              </button>
+
+              <button
+                onClick={() => handleSeleccionarOpcion('frecuencias_pago')}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  seccionActiva === 'frecuencias_pago'
+                    ? 'bg-zinc-800 text-white font-bold'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
+                }`}
+              >
+                <span>📅</span>
+                <span>Frecuencias de Pago</span>
+              </button>
+            </div>
+          )}
         </div>
+
+        {/* Grupo 3: Reportes y Soporte */}
+        <div className="border border-zinc-800/60 rounded-2xl overflow-hidden bg-zinc-900/20">
+          <button
+            onClick={() => toggleSeccion('sistema')}
+            className="w-full flex items-center justify-between p-3.5 text-xs font-bold text-zinc-300 hover:text-white transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="text-sm">📈</span>
+              <span>Reportes y Ayuda</span>
+            </div>
+            <span className="text-[10px] text-zinc-500 transition-transform duration-200">
+              {seccionesAbiertas.sistema ? '▲' : '▼'}
+            </span>
+          </button>
+
+          {seccionesAbiertas.sistema && (
+            <div className="p-2 space-y-1 bg-zinc-950/60 border-t border-zinc-800/50">
+              <button
+                onClick={() => handleSeleccionarOpcion('reportes')}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  seccionActiva === 'reportes'
+                    ? 'bg-zinc-800 text-white font-bold'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
+                }`}
+              >
+                <span>📈</span>
+                <span>Centro de Reportes</span>
+              </button>
+
+              <button
+                onClick={() => handleSeleccionarOpcion('soporte')}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  seccionActiva === 'soporte'
+                    ? 'bg-zinc-800 text-white font-bold'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
+                }`}
+              >
+                <span>🎧</span>
+                <span>Soporte Técnico</span>
+              </button>
+            </div>
+          )}
+        </div>
+
       </nav>
 
-      <div className="p-4 border-t border-zinc-800 bg-zinc-950">
-        <button 
-          onClick={handleLogout}
-          className="w-full py-2.5 px-3 bg-zinc-900 hover:bg-red-950/60 hover:text-red-400 text-zinc-300 rounded-xl font-semibold text-xs transition-all cursor-pointer border border-zinc-800 flex items-center justify-center gap-2"
-        >
-          <span>🚪</span> Cerrar Sesión
-        </button>
+      {/* Footer del Sidebar */}
+      <div className="p-4 border-t border-zinc-800/80 bg-zinc-950">
+        <div className="p-3 bg-zinc-900/60 rounded-2xl border border-zinc-800/80 flex items-center gap-3">
+          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+          <div>
+            <span className="text-[11px] font-bold text-white block">API Backend .NET</span>
+            <span className="text-[10px] text-zinc-400 font-mono">Conectado (5234)</span>
+          </div>
+        </div>
       </div>
     </aside>
   );
