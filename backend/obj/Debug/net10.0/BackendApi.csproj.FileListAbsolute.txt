@@ -251,7 +251,6 @@ C:\Users\Developer\Documents\React Projects\PartnerPay\backend\bin\Debug\net10.0
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\bin\Debug\net10.0\BackendApi.dll
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\bin\Debug\net10.0\BackendApi.pdb
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\bin\Debug\net10.0\Humanizer.dll
-C:\Users\Developer\Documents\React Projects\PartnerPay\backend\bin\Debug\net10.0\Microsoft.AspNetCore.OpenApi.dll
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\bin\Debug\net10.0\Microsoft.Build.Framework.dll
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\bin\Debug\net10.0\Microsoft.CodeAnalysis.dll
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\bin\Debug\net10.0\Microsoft.CodeAnalysis.CSharp.dll
@@ -270,6 +269,9 @@ C:\Users\Developer\Documents\React Projects\PartnerPay\backend\bin\Debug\net10.0
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\bin\Debug\net10.0\Newtonsoft.Json.dll
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\bin\Debug\net10.0\Npgsql.dll
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\bin\Debug\net10.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\Users\Developer\Documents\React Projects\PartnerPay\backend\bin\Debug\net10.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\Developer\Documents\React Projects\PartnerPay\backend\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\Developer\Documents\React Projects\PartnerPay\backend\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerUI.dll
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\bin\Debug\net10.0\System.CodeDom.dll
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\bin\Debug\net10.0\System.Composition.AttributedModel.dll
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\bin\Debug\net10.0\System.Composition.Convention.dll
@@ -349,6 +351,7 @@ C:\Users\Developer\Documents\React Projects\PartnerPay\backend\obj\Debug\net10.0
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\obj\Debug\net10.0\BackendApi.csproj.CoreCompileInputs.cache
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\obj\Debug\net10.0\BackendApi.MvcApplicationPartsAssemblyInfo.cs
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\obj\Debug\net10.0\BackendApi.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\Developer\Documents\React Projects\PartnerPay\backend\obj\Debug\net10.0\BackendApi.sourcelink.json
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\obj\Debug\net10.0\rjimswa.dswa.cache.json
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\obj\Debug\net10.0\rjsmrazor.dswa.cache.json
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\obj\Debug\net10.0\rjsmcshtml.dswa.cache.json
@@ -364,4 +367,3 @@ C:\Users\Developer\Documents\React Projects\PartnerPay\backend\obj\Debug\net10.0
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\obj\Debug\net10.0\BackendApi.pdb
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\obj\Debug\net10.0\BackendApi.genruntimeconfig.cache
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\obj\Debug\net10.0\ref\BackendApi.dll
-C:\Users\Developer\Documents\React Projects\PartnerPay\backend\obj\Debug\net10.0\BackendApi.sourcelink.json

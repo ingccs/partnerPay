@@ -33,12 +33,32 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
 
+// Configuración de Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new()
+    {
+        Title = "PartnerPay Enterprise Suite API",
+        Version = "v1",
+        Description = "Documentación oficial e interactiva de servicios web para PartnerPay."
+    });
+});
+
 var app = builder.Build();
 
-// Mostrar página detallada de excepciones en entorno de desarrollo para diagnóstico rápido
+// Mostrar página detallada de excepciones e interfaz de Swagger en entorno de desarrollo
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
+
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "PartnerPay API v1");
+        // Deja Swagger directamente en la raíz para acceso inmediato
+        c.RoutePrefix = string.Empty;
+    });
 }
 
 // app.UseHttpsRedirection();
