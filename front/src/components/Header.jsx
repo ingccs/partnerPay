@@ -9,7 +9,8 @@ export default function Header({ seccionActiva }) {
     frecuencias_pago: 'Frecuencias de Pago',
     afiliados: 'Gestión de Afiliados y Vendedores',
     reportes: 'Centro de Reportes y Analítica',
-    soporte: 'Soporte Técnico y Mesa de Ayuda'
+    soporte: 'Soporte Técnico y Mesa de Ayuda',
+    actualizar_saldos: 'Actualización y Auditoría de Saldos'
   };
 
   return (

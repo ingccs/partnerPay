@@ -15,6 +15,7 @@ import FrecuenciasPago from './components/FrecuenciasPago';
 import Afiliados from './components/Afiliados';
 import Reportes from './components/Reportes';
 import Soporte from './components/Soporte';
+import ActualizarSaldos from './components/ActualizarSaldos';
 
 const API_URL = 'http://localhost:5234/api';
 
@@ -342,6 +343,8 @@ function App() {
             />
           ) : seccionActiva === 'cuentas_pagadoras' ? (
             <CuentasPagadoras />
+          ) : seccionActiva === 'actualizar_saldos' ? (
+            <ActualizarSaldos />
           ) : seccionActiva === 'afiliados' ? (
             <Afiliados 
               statesList={statesList}

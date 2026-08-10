@@ -146,6 +146,18 @@ export default function Sidebar({ seccionActiva, setSeccionActiva }) {
               </button>
 
               <button
+                onClick={() => handleSeleccionarOpcion('actualizar_saldos')}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  seccionActiva === 'actualizar_saldos'
+                    ? 'bg-zinc-800 text-white font-bold'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
+                }`}
+              >
+                <span>💵</span>
+                <span>Actualizar Saldos</span>
+              </button>
+
+              <button
                 onClick={() => handleSeleccionarOpcion('frecuencias_pago')}
                 className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                   seccionActiva === 'frecuencias_pago'

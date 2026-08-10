@@ -15,11 +15,11 @@ namespace BackendApi.Data
         public DbSet<CuentaPagadora> CuentasPagadoras { get; set; }
         public DbSet<FrecuenciaPago> FrecuenciasPago { get; set; }
         public DbSet<FrequencyTypes> FrequencyTypes { get; set; }
+        public DbSet<HistorialBalance> HistorialBalances { get; set; }
         public DbSet<MaritalStatus> MaritalStatuses { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Policy> Policies { get; set; }
         public DbSet<Product> Products { get; set; }
-        
         public DbSet<ProductCoverage> ProductsCoverage { get; set; }
         public DbSet<ProductUser> ProductsUsers { get; set; }
         public DbSet<ProfileUser> Profiles { get; set; }
