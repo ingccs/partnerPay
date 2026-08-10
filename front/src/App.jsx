@@ -12,6 +12,9 @@ import Ramos from './components/Ramos';
 import CuentasPagadoras from './components/CuentasPagadoras';
 import Productos from './components/Productos';
 import FrecuenciasPago from './components/FrecuenciasPago';
+import Afiliados from './components/Afiliados';
+import Reportes from './components/Reportes';
+import Soporte from './components/Soporte';
 
 const API_URL = 'http://localhost:5234/api';
 
@@ -339,6 +342,17 @@ function App() {
             />
           ) : seccionActiva === 'cuentas_pagadoras' ? (
             <CuentasPagadoras />
+          ) : seccionActiva === 'afiliados' ? (
+            <Afiliados 
+              statesList={statesList}
+              ciudadesFiltradas={ciudadesFiltradas}
+              compCEstado={compCEstado}
+              setCompCEstado={setCompCEstado}
+            />
+          ) : seccionActiva === 'reportes' ? (
+            <Reportes />
+          ) : seccionActiva === 'soporte' ? (
+            <Soporte />
           ) : (
             <ModuloGenerico seccionActiva={seccionActiva} />
           )}

@@ -22,6 +22,31 @@ export default function Sidebar({ seccionActiva, setSeccionActiva, menuConfigAbi
         </button>
 
         <div className="pt-4 pb-2">
+          <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-3 mb-2">Gestión Operativa</div>
+          
+          <button 
+            onClick={() => setSeccionActiva('afiliados')}
+            className={`w-full text-left px-3.5 py-3 rounded-xl font-medium text-sm transition-all flex items-center gap-3 cursor-pointer ${seccionActiva === 'afiliados' ? 'bg-zinc-800 text-white font-semibold' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}
+          >
+            <span>👥</span> Afiliados
+          </button>
+
+          <button 
+            onClick={() => setSeccionActiva('reportes')}
+            className={`w-full text-left px-3.5 py-3 rounded-xl font-medium text-sm transition-all flex items-center gap-3 cursor-pointer ${seccionActiva === 'reportes' ? 'bg-zinc-800 text-white font-semibold' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}
+          >
+            <span>📈</span> Reportes
+          </button>
+
+          <button 
+            onClick={() => setSeccionActiva('soporte')}
+            className={`w-full text-left px-3.5 py-3 rounded-xl font-medium text-sm transition-all flex items-center gap-3 cursor-pointer ${seccionActiva === 'soporte' ? 'bg-zinc-800 text-white font-semibold' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}
+          >
+            <span>🎧</span> Soporte
+          </button>
+        </div>
+
+        <div className="pt-2 pb-2">
           <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-3 mb-2">Administración</div>
           
           <div className="bg-zinc-900/60 rounded-2xl p-1.5 border border-zinc-800/80">

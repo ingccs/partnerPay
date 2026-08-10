@@ -8,88 +8,74 @@ namespace BackendApi.Models
     public class Seller
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("idseller")]
-        public int IdSeller { get; set; }
+        public int Idseller { get; set; }
 
-        [Required]
         [Column("idpapa")]
-        public int IdPapa { get; set; }
+        public int Idpapa { get; set; } = 0;
 
-        [Required]
-        [MaxLength(8)]
         [Column("code")]
-        public string Code { get; set; } = string.Empty;
+        public string? Code { get; set; }
 
-        [Required]
-        [MaxLength(1)]
         [Column("typ")]
-        public string Typ { get; set; } = string.Empty;
+        public string Typ { get; set; } = "V";
 
-        [Required]
-        [MaxLength(9)]
         [Column("ci")]
         public string Ci { get; set; } = string.Empty;
 
-        [Required]
         [Column("name")]
         public string Name { get; set; } = string.Empty;
 
-        [Required]
         [Column("lastname")]
         public string Lastname { get; set; } = string.Empty;
 
-        [Required]
         [Column("email")]
         public string Email { get; set; } = string.Empty;
 
-        [Required]
         [Column("mobile")]
         public string Mobile { get; set; } = string.Empty;
 
-        [Column("comission", TypeName = "decimal(11,2)")]
-        public decimal? Comission { get; set; }
+        [Column("comission")]
+        public decimal? Comission { get; set; } = 0.00m;
 
         [Column("cestado")]
-        public int? CEstato { get; set; }
+        public int Cestado { get; set; }
 
         [Column("xcity")]
-        public string? XCity { get; set; }
+        public string Xcity { get; set; } = string.Empty;
 
         [Column("xdir")]
-        public string? XDir { get; set; }
+        public string Xdir { get; set; } = string.Empty;
 
-        [MaxLength(1)]
         [Column("ecivil")]
-        public string? ECivil { get; set; }
+        public string Ecivil { get; set; } = "S";
 
-        [MaxLength(1)]
         [Column("sexx")]
-        public string? Sexx { get; set; }
+        public string Sexx { get; set; } = "M";
 
         [Column("fecha_nac")]
-        public DateTime? FechaNac { get; set; }
+        public DateTime FechaNac { get; set; } = DateTime.UtcNow;
 
         [Column("banco")]
         public string? Banco { get; set; }
 
-        [MaxLength(20)]
         [Column("nrocta")]
-        public string? NroCta { get; set; }
+        public string? Nrocta { get; set; }
 
-        [Column("pdf_ced", TypeName = "bytea")]
-        public byte[]? PdfCed { get; set; } // Mapeo para archivos binarios (cédula)
+        [Column("pdf_ced")]
+        public byte[]? PdfCed { get; set; }
 
-        [Column("pdf_rif", TypeName = "bytea")]
-        public byte[]? PdfRif { get; set; } // Mapeo para archivos binarios (RIF)
+        [Column("pdf_rif")]
+        public byte[]? PdfRif { get; set; }
 
         [Column("nivel")]
-        public int? Nivel { get; set; }
+        public int Nivel { get; set; } = 1;
 
-        [MaxLength(8)]
         [Column("fpay")]
-        public string? FPay { get; set; }
+        public int Fpay { get; set; } = 1;
 
         [Column("idestatus")]
-        public int? IdEstatus { get; set; } = 1;
+        public int Idestatus { get; set; } = 1;
     }
 }
