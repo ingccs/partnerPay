@@ -6,40 +6,35 @@ namespace BackendApi.Data
     public class AppDbContext : DbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-        public DbSet<Company> Companies { get; set; }
-        public DbSet<Bank> Banks { get; set; }
-        public DbSet<MaritalStatus> MaritalStatuses { get; set; }
         public DbSet<AllEstatus> AllEstatus { get; set; }
         public DbSet<AllEstatusPay> AllEstatusPay { get; set; }
-        public DbSet<FrequencyTypes> FrequencyTypes { get; set; }
-        public DbSet<State> States { get; set; }
+        public DbSet<Bank> Banks { get; set; }
         public DbSet<City> Cities { get; set; }
-        public DbSet<Relationship> Relationships { get; set; }
+        public DbSet<Comission> Comissions { get; set; }
+        public DbSet<Company> Companies { get; set; }
+        public DbSet<CuentaPagadora> CuentasPagadoras { get; set; }
+        public DbSet<FrecuenciaPago> FrecuenciasPago { get; set; }
+        public DbSet<FrequencyTypes> FrequencyTypes { get; set; }
+        public DbSet<MaritalStatus> MaritalStatuses { get; set; }
+        public DbSet<Payment> Payments { get; set; }
         public DbSet<Policy> Policies { get; set; }
         public DbSet<Product> Products { get; set; }
-        public DbSet<ProductCoverage> ProductsCoverages { get; set; }
-        public DbSet<Ramo> Ramos { get; set; }
-        public DbSet<ProfileUser> Profiles { get; set; }
+        
+        public DbSet<ProductCoverage> ProductsCoverage { get; set; }
         public DbSet<ProductUser> ProductsUsers { get; set; }
-        public DbSet<User> Users { get; set; }
-        public DbSet<EmailValidation> ValidacionesEmail { get; set; }
-        public DbSet<Payment> Payments { get; set; }
+        public DbSet<ProfileUser> Profiles { get; set; }
+        public DbSet<Ramo> Ramos { get; set; }
+        public DbSet<Relationship> Relationships { get; set; }
+        public DbSet<ApiResponse> ResponseApis { get; set; }
         public DbSet<Seller> Sellers { get; set; }
         public DbSet<SellerCoverageComission> SellerCoverageComissions { get; set; }
-        public DbSet<Comission> Comissions { get; set; }
-        public DbSet<ApiResponse> ResponseApis { get; set; }
-
-
+        public DbSet<State> States { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<EmailValidation> ValidacionesEmail { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<MaritalStatus>().HasData(
-                new MaritalStatus { IdEcivil = 1, Ecivil = "Soltero", Letra = "S" },
-                new MaritalStatus { IdEcivil = 2, Ecivil = "Casado", Letra = "C" },
-                new MaritalStatus { IdEcivil = 3, Ecivil = "Viudo", Letra = "V" },
-                new MaritalStatus { IdEcivil = 4, Ecivil = "Divorciado", Letra = "D" }
-            );
 
             modelBuilder.Entity<AllEstatus>().HasData(
                 new AllEstatus { IdEstatus = 1, Estatus = "Activo" },
@@ -52,7 +47,14 @@ namespace BackendApi.Data
                 new AllEstatusPay { IdEstatus = 1, Estatus = "Registrado" },
                 new AllEstatusPay { IdEstatus = 2, Estatus = "Pagado" },
                 new AllEstatusPay { IdEstatus = 3, Estatus = "Anulado" }
-            );         
+            );  
+
+            modelBuilder.Entity<MaritalStatus>().HasData(
+                new MaritalStatus { IdEcivil = 1, Ecivil = "Soltero", Letra = "S" },
+                new MaritalStatus { IdEcivil = 2, Ecivil = "Casado", Letra = "C" },
+                new MaritalStatus { IdEcivil = 3, Ecivil = "Viudo", Letra = "V" },
+                new MaritalStatus { IdEcivil = 4, Ecivil = "Divorciado", Letra = "D" }
+            );       
 
             modelBuilder.Entity<FrequencyTypes>().HasData(
                 new FrequencyTypes { IdFrecu = 1, Frecuencia = "Anual", Letra = "A" },
@@ -111,6 +113,14 @@ namespace BackendApi.Data
                 new ProfileUser { IdPerfil = 2, Perfil = "Seller Master" },
                 new ProfileUser { IdPerfil = 3, Perfil = "Seller" }
             );
+
+            modelBuilder.Entity<Product>()
+                .HasMany(p => p.Coverages)
+                .WithOne(c => c.Product)
+                .HasForeignKey(c => c.Idproduct)
+                .HasConstraintName("fk_products_coverage");
+
+            modelBuilder.Entity<FrecuenciaPago>().ToTable("frecuencia_pagos");
         }
     }
 }

@@ -15,13 +15,6 @@ export default function Sidebar({ seccionActiva, setSeccionActiva, menuConfigAbi
         <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-3 mb-2">Principal</div>
         
         <button 
-          onClick={() => setSeccionActiva('items')}
-          className={`w-full text-left px-3.5 py-3 rounded-xl font-medium text-sm transition-all flex items-center gap-3 cursor-pointer ${seccionActiva === 'items' ? 'bg-zinc-800 text-white font-semibold' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}
-        >
-          <span>📋</span> Gestión de Registros
-        </button>
-        
-        <button 
           onClick={() => setSeccionActiva('analytics')}
           className={`w-full text-left px-3.5 py-3 rounded-xl font-medium text-sm transition-all flex items-center gap-3 cursor-pointer ${seccionActiva === 'analytics' ? 'bg-zinc-800 text-white font-semibold' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}
         >
@@ -43,13 +36,19 @@ export default function Sidebar({ seccionActiva, setSeccionActiva, menuConfigAbi
             {menuConfigAbierto && (
               <div className="pl-3 mt-1 space-y-1 border-l border-zinc-800 ml-4 py-1">
                 <button onClick={() => setSeccionActiva('empresas')} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-all ${seccionActiva === 'empresas' ? 'bg-zinc-800 text-white font-bold' : 'text-zinc-400 hover:text-zinc-200'}`}>
-                  Empresas
-                </button>
-                <button onClick={() => setSeccionActiva('productos')} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-all ${seccionActiva === 'productos' ? 'bg-zinc-800 text-white font-bold' : 'text-zinc-400 hover:text-zinc-200'}`}>
-                  Productos
+                  Proveedores de Servicio
                 </button>
                 <button onClick={() => setSeccionActiva('ramos')} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-all ${seccionActiva === 'ramos' ? 'bg-zinc-800 text-white font-bold' : 'text-zinc-400 hover:text-zinc-200'}`}>
                   Ramos
+                </button>
+                <button onClick={() => setSeccionActiva('productos')} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-all ${seccionActiva === 'productos' ? 'bg-zinc-800 text-white font-bold' : 'text-zinc-400 hover:text-zinc-200'}`}>
+                  Planes/Coberturas
+                </button>
+                <button onClick={() => setSeccionActiva('cuentas_pagadoras')} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-all ${seccionActiva === 'cuentas_pagadoras' ? 'bg-zinc-800 text-white font-bold' : 'text-zinc-400 hover:text-zinc-200'}`}>
+                  Cuentas Pagadoras
+                </button>
+                <button onClick={() => setSeccionActiva('frecuencias_pago')} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-all ${seccionActiva === 'frecuencias_pago' ? 'bg-zinc-800 text-white font-bold' : 'text-zinc-400 hover:text-zinc-200'}`}>
+                  Frecuencias de Pago
                 </button>
               </div>
             )}

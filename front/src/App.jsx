@@ -5,10 +5,13 @@ import './App.css';
 import Login from './components/Login';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
+import DashboardMetrics from './components/DashboardMetrics';
 import Empresas from './components/Empresas';
-import DashboardItems from './components/DashboardItems';
 import ModuloGenerico from './components/ModuloGenerico';
 import Ramos from './components/Ramos';
+import CuentasPagadoras from './components/CuentasPagadoras';
+import Productos from './components/Productos';
+import FrecuenciasPago from './components/FrecuenciasPago';
 
 const API_URL = 'http://localhost:5234/api';
 
@@ -19,14 +22,9 @@ function App() {
   const [errorLogin, setErrorLogin] = useState('');
   const [cargandoLogin, setCargandoLogin] = useState(false);
 
-  const [seccionActiva, setSeccionActiva] = useState('items');
+  // Sección activa por defecto configurada al Dashboard de Métricas ('analytics')
+  const [seccionActiva, setSeccionActiva] = useState('analytics');
   const [menuConfigAbierto, setMenuConfigAbierto] = useState(true);
-
-  // Estados de Módulo Principal (Items)
-  const [items, setItems] = useState([]);
-  const [nombre, setNombre] = useState('');
-  const [descripcion, setDescripcion] = useState('');
-  const [busqueda, setBusqueda] = useState('');
 
   // Estados del Módulo Empresas
   const [companies, setCompanies] = useState([]);
@@ -37,6 +35,8 @@ function App() {
   const [compMobile, setCompMobile] = useState('');
   const [compXDir, setCompXDir] = useState('');
   const [compIdEstatus, setCompIdEstatus] = useState(1);
+  const [compCodexPr, setCompCodexPr] = useState('');
+  const [idEditandoCompany, setIdEditandoCompany] = useState(null);
 
   // Estados/Ciudades de Venezuela
   const [statesList, setStatesList] = useState([]);
@@ -48,7 +48,11 @@ function App() {
   const [ramos, setRamos] = useState([]);
   const [busquedaRamo, setBusquedaRamo] = useState('');
 
-  // Filtro
+  // Estados para el Dashboard Global (Productos y Frecuencias)
+  const [productos, setProductos] = useState([]);
+  const [frecuencias, setFrecuencias] = useState([]);
+
+  // Filtro de Ciudades por Estado
   const ciudadesFiltradas = citiesList.filter(city => {
     const estadoCiudad = String(city.cEstado ?? city.cestado ?? '');
     const estadoSeleccionado = String(compCEstado ?? '');
@@ -59,11 +63,12 @@ function App() {
 
   useEffect(() => {
     if (usuarioAutenticado) {
-      cargarItems();
       cargarCompanies();
       cargarStates();
       cargarCities();
       cargarRamos();
+      cargarProductosGlobal();
+      cargarFrecuenciasGlobal();
     }
   }, [usuarioAutenticado]);
 
@@ -81,13 +86,6 @@ function App() {
       .catch(err => console.error("Error al cargar ciudades:", err));
   };
 
-  const cargarItems = () => {
-    fetch(`${API_URL}/items`)
-      .then(res => res.json())
-      .then(data => setItems(data))
-      .catch(err => console.error("Error al cargar items:", err));
-  };
-
   const cargarCompanies = () => {
     fetch(`${API_URL}/companies`)
       .then(res => res.json())
@@ -98,8 +96,32 @@ function App() {
   const cargarRamos = () => {
     fetch(`${API_URL}/ramos`)
       .then(res => res.json())
-      .then(data => setRamos(data))
+      .then(data => {
+        const lista = Array.isArray(data) ? data : (data.data || data.$values || []);
+        console.log("RAMOS CARGADOS EN APP.JSX:", lista); // Ver en F12
+        setRamos(lista);
+      })
       .catch(err => console.error("Error al cargar ramos:", err));
+  };
+
+  const cargarProductosGlobal = () => {
+    fetch(`${API_URL}/products`)
+      .then(res => res.json())
+      .then(data => {
+        const lista = Array.isArray(data) ? data : (data.data || data.$values || []);
+        setProductos(lista);
+      })
+      .catch(err => console.error("Error al cargar productos globalmente:", err));
+  };
+
+  const cargarFrecuenciasGlobal = () => {
+    fetch(`${API_URL}/frecuencias-pago`)
+      .then(res => res.json())
+      .then(data => {
+        const lista = Array.isArray(data) ? data : (data.data || data.$values || []);
+        setFrecuencias(lista);
+      })
+      .catch(err => console.error("Error al cargar frecuencias globalmente:", err));
   };
 
   const handleLogin = (e) => {
@@ -131,30 +153,57 @@ function App() {
     setUsuarioAutenticado(null);
     setEmailLogin('');
     setPasswordLogin('');
-    setItems([]);
     setCompanies([]);
+    setRamos([]);
+    setProductos([]);
+    setFrecuencias([]);
   };
 
-  const handleSubmitItem = (e) => {
-    e.preventDefault();
-    if (!nombre.trim()) return;
+  const limpiarFormularioCompany = () => {
+    setIdEditandoCompany(null);
+    setCompTyp('J');
+    setCompCi('');
+    setCompName('');
+    setCompEmail('');
+    setCompMobile('');
+    setCompCEstado('');
+    setCompXCity('');
+    setCompXDir('');
+    setCompCodexPr('');
+    setCompIdEstatus(1);
+  };
 
-    fetch(`${API_URL}/items`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nombre, descripcion })
-    })
-    .then(() => {
-      setNombre('');
-      setDescripcion('');
-      cargarItems();
-    })
-    .catch(err => console.error("Error al crear:", err));
+  const seleccionarParaEditarCompany = (comp) => {
+    setIdEditandoCompany(comp.idCmpy || comp.id_cmpy || comp.id);
+    setCompTyp(comp.typ || 'J');
+    setCompCi(comp.ci ? String(comp.ci) : '');
+    setCompName(comp.name || comp.xname || '');
+    setCompEmail(comp.email || '');
+    setCompMobile(comp.mobile || '');
+    
+    const valEstado = comp.cestado ?? comp.cEstado ?? comp.idEstado ?? '';
+    setCompCEstado(valEstado !== '' ? String(valEstado) : '');
+
+    setCompXDir(comp.xdir || comp.xDir || comp.xdirection || '');
+    setCompCodexPr(comp.codexPr || comp.codex_pr || '');
+    setCompIdEstatus(comp.idestatus ?? comp.idEstatus ?? 1);
+
+    const nombreCiudad = comp.xcity || comp.xCity || '';
+    setTimeout(() => {
+      setCompXCity(nombreCiudad);
+    }, 50);
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSubmitCompany = (e) => {
     e.preventDefault();
-    const nuevaEmpresa = {
+    const esEdicion = idEditandoCompany !== null;
+    const url = esEdicion ? `${API_URL}/companies/${idEditandoCompany}` : `${API_URL}/companies`;
+    const metodo = esEdicion ? 'PUT' : 'POST';
+
+    const empresaPayload = {
+      idCmpy: idEditandoCompany || 0,
       typ: compTyp,
       ci: compCi,
       name: compName,
@@ -163,28 +212,31 @@ function App() {
       cestado: parseInt(compCEstado),
       xcity: compXCity,
       xdir: compXDir,
+      codexPr: compCodexPr && compCodexPr.trim() !== '' ? compCodexPr.trim() : null,
       idestatus: parseInt(compIdEstatus)
     };
 
-    fetch(`${API_URL}/companies`, {
-      method: 'POST',
+    fetch(url, {
+      method: metodo,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(nuevaEmpresa)
+      body: JSON.stringify(empresaPayload)
     })
-    .then(res => {
-      if (!res.ok) throw new Error("Error al registrar empresa");
-      return res.json();
+    .then(async res => {
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("❌ DETALLE DEL ERROR BACKEND:", res.status, errorText);
+        throw new Error(errorText);
+      }
+      return res.status === 204 ? null : res.json();
     })
     .then(() => {
-      setCompCi('');
-      setCompName('');
-      setCompEmail('');
-      setCompMobile('');
-      setCompCEstado('');
-      setCompXCity('');
-      setCompXDir('');
+      limpiarFormularioCompany();
       cargarCompanies();
-      setNotificacion({ show: true, mensaje: '¡Empresa registrada exitosamente en el sistema!', tipo: 'success' });
+      setNotificacion({ 
+        show: true, 
+        mensaje: esEdicion ? '¡Empresa modificada exitosamente!' : '¡Empresa registrada exitosamente en el sistema!', 
+        tipo: 'success' 
+      });
       setTimeout(() => setNotificacion({ show: false, mensaje: '', tipo: 'success' }), 4000);
     })
     .catch(err => {
@@ -197,14 +249,12 @@ function App() {
   const eliminarCompany = (id) => {
     if (!window.confirm("¿Desea eliminar esta empresa permanentemente?")) return;
     fetch(`${API_URL}/companies/${id}`, { method: 'DELETE' })
-      .then(() => cargarCompanies())
+      .then(() => {
+        if (idEditandoCompany === id) limpiarFormularioCompany();
+        cargarCompanies();
+      })
       .catch(err => console.error("Error al eliminar empresa:", err));
   };
-
-  const itemsFiltrados = items.filter(item => 
-    item.nombre.toLowerCase().includes(busqueda.toLowerCase()) || 
-    (item.descripcion && item.descripcion.toLowerCase().includes(busqueda.toLowerCase()))
-  );
 
   // Pantalla de Login
   if (!usuarioAutenticado) {
@@ -236,7 +286,15 @@ function App() {
         <Header seccionActiva={seccionActiva} />
 
         <main className="p-6 sm:p-10 flex-1 max-w-7xl w-full mx-auto bg-zinc-50">
-          {seccionActiva === 'empresas' ? (
+          {seccionActiva === 'analytics' || seccionActiva === 'dashboard' ? (
+            <DashboardMetrics 
+              companies={companies}
+              ramos={ramos}
+              productos={productos}
+              frecuencias={frecuencias}
+              setSeccionActiva={setSeccionActiva}
+            />
+          ) : seccionActiva === 'empresas' ? (
             <Empresas 
               notificacion={notificacion}
               setNotificacion={setNotificacion}
@@ -261,27 +319,26 @@ function App() {
               setCompIdEstatus={setCompIdEstatus}
               compXDir={compXDir}
               setCompXDir={setCompXDir}
+              compCodexPr={compCodexPr}
+              setCompCodexPr={setCompCodexPr}
               companies={companies}
               eliminarCompany={eliminarCompany}
+              seleccionarParaEditarCompany={seleccionarParaEditarCompany}
+              idEditandoCompany={idEditandoCompany}
+              limpiarFormularioCompany={limpiarFormularioCompany}
             />
-          ) : seccionActiva === 'items' ? (
-            <DashboardItems 
-              items={items}
-              handleSubmitItem={handleSubmitItem}
-              nombre={nombre}
-              setNombre={setNombre}
-              descripcion={descripcion}
-              setDescripcion={setDescripcion}
-              busqueda={busqueda}
-              setBusqueda={setBusqueda}
-              itemsFiltrados={itemsFiltrados}
-            />
+          ) : seccionActiva === 'productos' ? (
+            <Productos companiesList={companies} ramosList={ramos} />
+          ) : seccionActiva === 'frecuencias_pago' ? (
+            <FrecuenciasPago />
           ) : seccionActiva === 'ramos' ? (
             <Ramos 
               ramos={ramos}
               busquedaRamo={busquedaRamo}
               setBusquedaRamo={setBusquedaRamo}
             />
+          ) : seccionActiva === 'cuentas_pagadoras' ? (
+            <CuentasPagadoras />
           ) : (
             <ModuloGenerico seccionActiva={seccionActiva} />
           )}

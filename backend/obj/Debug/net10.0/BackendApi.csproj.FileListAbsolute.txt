@@ -364,3 +364,4 @@ C:\Users\Developer\Documents\React Projects\PartnerPay\backend\obj\Debug\net10.0
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\obj\Debug\net10.0\BackendApi.pdb
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\obj\Debug\net10.0\BackendApi.genruntimeconfig.cache
 C:\Users\Developer\Documents\React Projects\PartnerPay\backend\obj\Debug\net10.0\ref\BackendApi.dll
+C:\Users\Developer\Documents\React Projects\PartnerPay\backend\obj\Debug\net10.0\BackendApi.sourcelink.json

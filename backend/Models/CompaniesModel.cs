@@ -47,5 +47,8 @@ namespace BackendApi.Models
         [Required]
         [Column("idestatus")]
         public int IdEstatus { get; set; }
+
+        [Column("codex_pr")]
+        public string? CodexPr { get; set; } 
     }
 }

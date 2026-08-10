@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using BackendApi.Data;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,9 +22,24 @@ builder.Services.AddCors(options =>
                       });
 });
 
-builder.Services.AddControllers();
+// Configuración de Controladores + Evitar ciclos de serialización JSON en Entity Framework
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Ignora referencias circulares al incluir relaciones como Products -> Coverages
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        // Fuerza nombres de propiedades compatibles con React (camelCase)
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    });
 
 var app = builder.Build();
+
+// Mostrar página detallada de excepciones en entorno de desarrollo para diagnóstico rápido
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
 
 // app.UseHttpsRedirection();
 
