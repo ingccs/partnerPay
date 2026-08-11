@@ -10,12 +10,14 @@ namespace BackendApi.Data
         public DbSet<AllEstatusPay> AllEstatusPay { get; set; }
         public DbSet<Bank> Banks { get; set; }
         public DbSet<City> Cities { get; set; }
+        public DbSet<ComisionVenta> ComisionesVentas { get; set; }
         public DbSet<Comission> Comissions { get; set; }
         public DbSet<Company> Companies { get; set; }
         public DbSet<CuentaPagadora> CuentasPagadoras { get; set; }
         public DbSet<FrecuenciaPago> FrecuenciasPago { get; set; }
         public DbSet<FrequencyTypes> FrequencyTypes { get; set; }
         public DbSet<HistorialBalance> HistorialBalances { get; set; }
+        public DbSet<Liquidacion> Liquidaciones { get; set; }
         public DbSet<MaritalStatus> MaritalStatuses { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Policy> Policies { get; set; }
@@ -31,6 +33,7 @@ namespace BackendApi.Data
         public DbSet<State> States { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<EmailValidation> ValidacionesEmail { get; set; }
+        public DbSet<Venta> Ventas { get; set; }
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

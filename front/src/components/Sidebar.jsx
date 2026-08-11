@@ -1,18 +1,12 @@
 import { useState } from 'react';
 
 export default function Sidebar({ seccionActiva, setSeccionActiva }) {
-  // Estado para controlar qué secciones están desplegadas (inician todas cerradas/false)
-  const [seccionesAbiertas, setSeccionesAbiertas] = useState({
-    configuracion: false,
-    comercial: false,
-    sistema: false
-  });
+  // Estado para controlar cuál categoría está abierta (null = todas cerradas)
+  const [seccionAbierta, setSeccionAbierta] = useState(null);
 
+  // Al hacer clic, abre la categoría seleccionada y cierra automáticamente las demás
   const toggleSeccion = (clave) => {
-    setSeccionesAbiertas(prev => ({
-      ...prev,
-      [clave]: !prev[clave]
-    }));
+    setSeccionAbierta(prevClave => (prevClave === clave ? null : clave));
   };
 
   const handleSeleccionarOpcion = (itemKey) => {
@@ -59,11 +53,11 @@ export default function Sidebar({ seccionActiva, setSeccionActiva }) {
               <span>Configuración Operativa</span>
             </div>
             <span className="text-[10px] text-zinc-500 transition-transform duration-200">
-              {seccionesAbiertas.configuracion ? '▲' : '▼'}
+              {seccionAbierta === 'configuracion' ? '▲' : '▼'}
             </span>
           </button>
 
-          {seccionesAbiertas.configuracion && (
+          {seccionAbierta === 'configuracion' && (
             <div className="p-2 space-y-1 bg-zinc-950/60 border-t border-zinc-800/50">
               <button
                 onClick={() => handleSeleccionarOpcion('empresas')}
@@ -104,22 +98,22 @@ export default function Sidebar({ seccionActiva, setSeccionActiva }) {
           )}
         </div>
 
-        {/* Grupo 2: Gestión Comercial y Finanzas */}
+        {/* Grupo 2: Red y Estructura MLM */}
         <div className="border border-zinc-800/60 rounded-2xl overflow-hidden bg-zinc-900/20">
           <button
-            onClick={() => toggleSeccion('comercial')}
+            onClick={() => toggleSeccion('red_mlm')}
             className="w-full flex items-center justify-between p-3.5 text-xs font-bold text-zinc-300 hover:text-white transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-2.5">
-              <span className="text-sm">💼</span>
-              <span>Comercial y Pago</span>
+              <span className="text-sm">🌳</span>
+              <span>Red y Jerarquía MLM</span>
             </div>
             <span className="text-[10px] text-zinc-500 transition-transform duration-200">
-              {seccionesAbiertas.comercial ? '▲' : '▼'}
+              {seccionAbierta === 'red_mlm' ? '▲' : '▼'}
             </span>
           </button>
 
-          {seccionesAbiertas.comercial && (
+          {seccionAbierta === 'red_mlm' && (
             <div className="p-2 space-y-1 bg-zinc-950/60 border-t border-zinc-800/50">
               <button
                 onClick={() => handleSeleccionarOpcion('afiliados')}
@@ -133,6 +127,38 @@ export default function Sidebar({ seccionActiva, setSeccionActiva }) {
                 <span>Afiliados / Vendedores</span>
               </button>
 
+              <button
+                onClick={() => handleSeleccionarOpcion('red_afiliados')}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  seccionActiva === 'red_afiliados'
+                    ? 'bg-zinc-800 text-white font-bold'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
+                }`}
+              >
+                <span>🌳</span>
+                <span>Árbol de Red y Carga Masiva</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Grupo 3: Gestión Comercial y Finanzas */}
+        <div className="border border-zinc-800/60 rounded-2xl overflow-hidden bg-zinc-900/20">
+          <button
+            onClick={() => toggleSeccion('comercial')}
+            className="w-full flex items-center justify-between p-3.5 text-xs font-bold text-zinc-300 hover:text-white transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="text-sm">💼</span>
+              <span>Comercial y Pago</span>
+            </div>
+            <span className="text-[10px] text-zinc-500 transition-transform duration-200">
+              {seccionAbierta === 'comercial' ? '▲' : '▼'}
+            </span>
+          </button>
+
+          {seccionAbierta === 'comercial' && (
+            <div className="p-2 space-y-1 bg-zinc-950/60 border-t border-zinc-800/50">
               <button
                 onClick={() => handleSeleccionarOpcion('cuentas_pagadoras')}
                 className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
@@ -168,11 +194,23 @@ export default function Sidebar({ seccionActiva, setSeccionActiva }) {
                 <span>📅</span>
                 <span>Frecuencias de Pago</span>
               </button>
+
+              <button
+                onClick={() => handleSeleccionarOpcion('liquidacion_comisiones')}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  seccionActiva === 'liquidacion_comisiones'
+                    ? 'bg-zinc-800 text-white font-bold'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
+                }`}
+              >
+                <span>💳</span>
+                <span>Liquidación de Comisiones</span>
+              </button>
             </div>
           )}
         </div>
 
-        {/* Grupo 3: Reportes y Soporte */}
+        {/* Grupo 4: Reportes y Soporte */}
         <div className="border border-zinc-800/60 rounded-2xl overflow-hidden bg-zinc-900/20">
           <button
             onClick={() => toggleSeccion('sistema')}
@@ -183,11 +221,11 @@ export default function Sidebar({ seccionActiva, setSeccionActiva }) {
               <span>Reportes y Ayuda</span>
             </div>
             <span className="text-[10px] text-zinc-500 transition-transform duration-200">
-              {seccionesAbiertas.sistema ? '▲' : '▼'}
+              {seccionAbierta === 'sistema' ? '▲' : '▼'}
             </span>
           </button>
 
-          {seccionesAbiertas.sistema && (
+          {seccionAbierta === 'sistema' && (
             <div className="p-2 space-y-1 bg-zinc-950/60 border-t border-zinc-800/50">
               <button
                 onClick={() => handleSeleccionarOpcion('reportes')}

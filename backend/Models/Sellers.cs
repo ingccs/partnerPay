@@ -63,12 +63,6 @@ namespace BackendApi.Models
         [Column("nrocta")]
         public string? Nrocta { get; set; }
 
-        [Column("pdf_ced")]
-        public byte[]? PdfCed { get; set; }
-
-        [Column("pdf_rif")]
-        public byte[]? PdfRif { get; set; }
-
         [Column("nivel")]
         public int Nivel { get; set; } = 1;
 
@@ -77,5 +71,11 @@ namespace BackendApi.Models
 
         [Column("idestatus")]
         public int Idestatus { get; set; } = 1;
+    }
+
+    // 💡 DTO para la carga masiva desde Excel recibiendo el código del padre
+    public class CargaMasivaSellerDto : Seller
+    {
+        public string? CodePadre { get; set; }
     }
 }

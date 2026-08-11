@@ -1,16 +1,17 @@
 export default function Header({ seccionActiva }) {
   const titulosSeccion = {
-    items: 'Gestión General de Registros',
-    analytics: 'Métricas y Rendimiento del Sistema',
-    empresas: 'Directorio y Registro de Empresas',
-    productos: 'Catálogo de Productos',
-    ramos: 'Gestión de Ramos Operativos',
-    cuentas_pagadoras: 'Cuentas Pagadoras',
-    frecuencias_pago: 'Frecuencias de Pago',
-    afiliados: 'Gestión de Afiliados y Vendedores',
-    reportes: 'Centro de Reportes y Analítica',
-    soporte: 'Soporte Técnico y Mesa de Ayuda',
-    actualizar_saldos: 'Actualización y Auditoría de Saldos'
+    analytics: 'Métricas Principales del Sistema',
+    empresas: 'Gestión de Empresas Proveedoras',
+    ramos: 'Ramos de Seguro',
+    productos: 'Catálogo de Productos y Coberturas',
+    afiliados: 'Nómina de Afiliados y Vendedores',
+    red_afiliados: 'Red de Afiliados (MLM)',
+    cuentas_pagadoras: 'Cuentas Pagadoras de Dispersión',
+    actualizar_saldos: 'Actualización y Auditoría de Saldos',
+    frecuencias_pago: 'Frecuencias y Días de Pago',
+    liquidacion_comisiones: 'Liquidación de Comisiones y Residuales',
+    reportes: 'Centro de Reportes',
+    soporte: 'Soporte Técnico'
   };
 
   return (

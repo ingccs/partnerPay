@@ -16,6 +16,8 @@ import Afiliados from './components/Afiliados';
 import Reportes from './components/Reportes';
 import Soporte from './components/Soporte';
 import ActualizarSaldos from './components/ActualizarSaldos';
+import RedAfiliados from './components/RedAfiliados';
+import LiquidacionComisiones from './components/LiquidacionComisiones';
 
 const API_URL = 'http://localhost:5234/api';
 
@@ -41,6 +43,9 @@ function App() {
   const [compIdEstatus, setCompIdEstatus] = useState(1);
   const [compCodexPr, setCompCodexPr] = useState('');
   const [idEditandoCompany, setIdEditandoCompany] = useState(null);
+
+  // Estados del Módulo Afiliados / Sellers
+  const [sellers, setSellers] = useState([]);
 
   // Estados/Ciudades de Venezuela
   const [statesList, setStatesList] = useState([]);
@@ -73,6 +78,7 @@ function App() {
       cargarRamos();
       cargarProductosGlobal();
       cargarFrecuenciasGlobal();
+      cargarSellersGlobal();
     }
   }, [usuarioAutenticado]);
 
@@ -95,6 +101,16 @@ function App() {
       .then(res => res.json())
       .then(data => setCompanies(data))
       .catch(err => console.error("Error al cargar empresas:", err));
+  };
+
+  const cargarSellersGlobal = () => {
+    fetch(`${API_URL}/sellers`)
+      .then(res => res.json())
+      .then(data => {
+        const lista = Array.isArray(data) ? data : (data.data || data.$values || []);
+        setSellers(lista);
+      })
+      .catch(err => console.error("Error al cargar afiliados globalmente:", err));
   };
 
   const cargarRamos = () => {
@@ -161,6 +177,7 @@ function App() {
     setRamos([]);
     setProductos([]);
     setFrecuencias([]);
+    setSellers([]);
   };
 
   const limpiarFormularioCompany = () => {
@@ -351,6 +368,15 @@ function App() {
               ciudadesFiltradas={ciudadesFiltradas}
               compCEstado={compCEstado}
               setCompCEstado={setCompCEstado}
+            />
+          ) : seccionActiva === 'red_afiliados' ? (
+            <RedAfiliados 
+              sellers={sellers} 
+              cargarSellers={cargarSellersGlobal} 
+            />
+          ) : seccionActiva === 'liquidacion_comisiones' ? (
+            <LiquidacionComisiones 
+              sellers={sellers} 
             />
           ) : seccionActiva === 'reportes' ? (
             <Reportes />

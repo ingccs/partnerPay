@@ -111,6 +111,138 @@ namespace BackendApi.Controllers
             }
         }
 
+        // POST: api/sellers/carga-masiva
+        [HttpPost("carga-masiva")]
+        public async Task<IActionResult> CargaMasivaSellers([FromBody] List<CargaMasivaSellerDto> listaSellers)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // 1. Filtrar en memoria la lista entrante para no procesar códigos/cédulas duplicados dentro del mismo Excel
+                var listaSinDuplicadosExcel = listaSellers
+                    .GroupBy(s => new { Ci = s.Ci.Trim(), Code = (s.Code ?? "").Trim().ToUpper() })
+                    .Select(g => g.First())
+                    .ToList();
+
+                // 2. Traer de la base de datos todos los vendedores existentes para comparar por Cédula y Código
+                var cedulasExistentes = await _context.Sellers.ToDictionaryAsync(s => s.Ci.Trim(), s => s);
+                var codigosExistentes = await _context.Sellers
+                    .Where(s => !string.IsNullOrEmpty(s.Code))
+                    .ToDictionaryAsync(s => s.Code!.Trim().ToUpper(), s => s);
+
+                var mapaCodigosNuevos = new Dictionary<string, Seller>();
+
+                // 3. Primera pasada: Insertar nuevos o Actualizar existentes evitando duplicados
+                foreach (var item in listaSinDuplicadosExcel)
+                {
+                    string ciClean = item.Ci.Trim();
+                    string codeClean = !string.IsNullOrEmpty(item.Code) ? item.Code.Trim().ToUpper() : "";
+
+                    Seller sellerTarget;
+
+                    // Verificar si el vendedor ya existe en la BD por Cédula o Código
+                    if (cedulasExistentes.TryGetValue(ciClean, out var sellerExistente) || 
+                    (!string.IsNullOrEmpty(codeClean) && codigosExistentes.TryGetValue(codeClean, out sellerExistente)))
+                    {
+                        // ACTUALIZAR REGISTRO EXISTENTE (No duplica)
+                        sellerTarget = sellerExistente;
+                        sellerTarget.Name = item.Name.Trim().ToUpper();
+                        sellerTarget.Lastname = item.Lastname.Trim().ToUpper();
+                        sellerTarget.Email = item.Email.Trim().ToLower();
+                        sellerTarget.Mobile = item.Mobile.Trim();
+                        sellerTarget.Cestado = item.Cestado;
+                        sellerTarget.Xcity = item.Xcity.Trim().ToUpper();
+                        sellerTarget.Xdir = item.Xdir.Trim().ToUpper();
+                        sellerTarget.Nivel = item.Nivel;
+                        if (!string.IsNullOrEmpty(item.Banco)) sellerTarget.Banco = item.Banco.Trim().ToUpper();
+                        if (!string.IsNullOrEmpty(item.Nrocta)) sellerTarget.Nrocta = item.Nrocta.Trim();
+                        sellerTarget.Idestatus = item.Idestatus;
+                        if (!string.IsNullOrEmpty(codeClean)) sellerTarget.Code = codeClean;
+                    }
+                    else
+                    {
+                        // INSERTAR NUEVO REGISTRO
+                        sellerTarget = new Seller
+                        {
+                            Idseller = 0,
+                            Code = !string.IsNullOrEmpty(codeClean) ? codeClean : null,
+                            Typ = item.Typ,
+                            Ci = ciClean,
+                            Name = item.Name.Trim().ToUpper(),
+                            Lastname = item.Lastname.Trim().ToUpper(),
+                            Email = item.Email.Trim().ToLower(),
+                            Mobile = item.Mobile.Trim(),
+                            Cestado = item.Cestado,
+                            Xcity = item.Xcity.Trim().ToUpper(),
+                            Xdir = item.Xdir.Trim().ToUpper(),
+                            Ecivil = item.Ecivil,
+                            Sexx = item.Sexx,
+                            FechaNac = item.FechaNac,
+                            Nivel = item.Nivel,
+                            Banco = !string.IsNullOrEmpty(item.Banco) ? item.Banco.Trim().ToUpper() : null,
+                            Nrocta = !string.IsNullOrEmpty(item.Nrocta) ? item.Nrocta.Trim() : null,
+                            Idestatus = item.Idestatus,
+                            Fpay = item.Fpay,
+                            Idpapa = 0
+                        };
+
+                        _context.Sellers.Add(sellerTarget);
+                    }
+
+                    if (!string.IsNullOrEmpty(codeClean))
+                    {
+                        mapaCodigosNuevos[codeClean] = sellerTarget;
+                    }
+                }
+
+                // Guardar cambios primarios para obtener los IDs
+                await _context.SaveChangesAsync();
+
+                // 4. Segunda pasada: Resolver y asociar el Idpapa vía CodePadre
+                foreach (var item in listaSinDuplicadosExcel)
+                {
+                    if (!string.IsNullOrEmpty(item.CodePadre))
+                    {
+                        string codePadreClean = item.CodePadre.Trim().ToUpper();
+                        int idPapaResuelto = 0;
+
+                        if (codigosExistentes.TryGetValue(codePadreClean, out var padreExistente))
+                        {
+                            idPapaResuelto = padreExistente.Idseller;
+                        }
+                        else if (mapaCodigosNuevos.TryGetValue(codePadreClean, out var nuevoPadre))
+                        {
+                            idPapaResuelto = nuevoPadre.Idseller;
+                        }
+
+                        if (idPapaResuelto > 0)
+                        {
+                            string codeHijoClean = !string.IsNullOrEmpty(item.Code) ? item.Code.Trim().ToUpper() : "";
+                            if (!string.IsNullOrEmpty(codeHijoClean) && mapaCodigosNuevos.TryGetValue(codeHijoClean, out var sellerHijo))
+                            {
+                                sellerHijo.Idpapa = idPapaResuelto;
+                            }
+                            else if (cedulasExistentes.TryGetValue(item.Ci.Trim(), out var sellerHijoCedula))
+                            {
+                                sellerHijoCedula.Idpapa = idPapaResuelto;
+                            }
+                        }
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return Ok(new { mensaje = "Carga masiva procesada sin duplicar registros." });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                var msg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return StatusCode(500, $"Error en carga masiva: {msg}");
+            }
+        }
+
         // DELETE: api/sellers/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSeller(int id)
